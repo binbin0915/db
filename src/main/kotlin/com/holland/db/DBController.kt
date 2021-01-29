@@ -3,31 +3,44 @@ package com.holland.db
 import com.holland.db.service.FetchTables
 import com.holland.db.service.ModelGenerator
 import com.holland.db.service.ServiceGenerator
+import com.holland.util.FileWriteUtil
 import java.io.File
 import java.sql.Connection
 import java.sql.DriverManager
-import kotlin.system.exitProcess
 
 @Suppress("unused", "JoinDeclarationAndAssignment", "MemberVisibilityCanBePrivate")
-class DBController {
+class DBController(val dataSource: String, host: String, port: String, user: String, pwd: String) {
     lateinit var `package`: String
     lateinit var tableName: String
     var schema: String? = null
-    var dataSource: String? = null
 
-    lateinit var connection: Connection
-    private lateinit var classPrefix: String
+    var connection: Connection
+    private val classPrefix: String
 
-    constructor(url: String, user: String, pwd: String) {
+    init {
         FileWriteUtil.mkdir(rootPath)
-        initConnection(url, user, pwd)
-    }
-
-    constructor(url: String, user: String, pwd: String, `package`: String, tableName: String) {
-        this.`package` = `package`
-        this.tableName = tableName
-        FileWriteUtil.mkdir(rootPath)
-        initConnection(url, user, pwd)
+        Class.forName(
+            when (dataSource) {
+                "ORACLE" -> {
+                    classPrefix = "Oracle"
+                    connection = DriverManager.getConnection("jdbc:oracle:thin:@${host}:${port}/orcl", user, pwd)
+                    "oracle.jdbc.driver.OracleDriver"
+                }
+                "MYSQL" -> {
+                    classPrefix = "Mysql"
+                    connection =
+                        DriverManager.getConnection(
+                            "jdbc:mysql://${host}:${port}/mysql?useUnicode=true&characterEncoding=utf8&useSSL=false&autoReconnect=true&serverTimezone=Asia/Shanghai",
+                            user,
+                            pwd
+                        )
+                    "com.mysql.cj.jdbc.Driver"
+                }
+                else -> {
+                    throw RuntimeException("not support [$dataSource]")
+                }
+            }
+        )
     }
 
     fun fetchTables(): DBController {
@@ -75,33 +88,20 @@ class DBController {
         println("connection is ${if (connection.isClosed.not()) "not" else ""}closed")
     }
 
-    private fun initConnection(url: String, user: String, pwd: String) {
-        Class.forName(
-            when {
-                url.contains("oracle") -> {
-                    classPrefix = "Oracle"
-                    this.tableName = tableName.toUpperCase()
-                    dataSource = "ORACLE"
-                    connection = DriverManager.getConnection(url, user, pwd)
-                    "oracle.jdbc.driver.OracleDriver"
-                }
-                url.contains("mysql") -> {
-                    classPrefix = "Mysql"
-                    val split = url.split('/')[3].split('?')
-                    schema = split[0]
-                    connection =
-                        DriverManager.getConnection(
-                            if (split.size == 1) "$url?useUnicode=true&characterEncoding=utf8&useSSL=false&autoReconnect=true&serverTimezone=Asia/Shanghai" else url,
-                            user,
-                            pwd)
-                    "com.mysql.cj.jdbc.Driver"
-                }
-                else -> {
-                    println("not support [$url]")
-                    exitProcess(0)
-                }
-            }
-        )
+    /**
+     * heart connect
+     */
+    fun ping(): Boolean {
+        return if (connection.isClosed) {
+            false
+        } else {
+            val statement = connection.prepareStatement("select 1 from dual")
+            statement.execute()
+            statement.resultSet.let {
+                it.next()
+                it.getInt(1)
+            } == 1
+        }
     }
 
     companion object {
@@ -109,33 +109,4 @@ class DBController {
         const val pojo = "pojo"
         const val dao = "service"
     }
-}
-
-fun main(args: Array<String>) {
-    val url = "jdbc:oracle:thin:@11.101.2.36:1521/orcl"
-    val user = "acd_ora"
-    val pwd = "xiaomi"
-//    val url = "jdbc:oracle:thin:@11.101.2.195:1521/orcl"
-//    val user = "yb_acd"
-//    val pwd = "yb_acd"
-//    val url =
-//        "jdbc:mysql://11.101.2.195:3306/lw_admin?useUnicode=true&characterEncoding=utf8&useSSL=false&autoReconnect=true&serverTimezone=Asia/Shanghai"
-//    val user = "root"
-//    val pwd = "123456"
-    val `package` = "com.stardon.stardon_main"
-    val tableName = "acd_file"
-    DBController(url, user, pwd, `package`, tableName).fetchTables().close()
-
-//    when (args[0]) {
-//        "tables" -> {
-//            DBController(args[1], args[2], args[3])
-//                .fetchTables()
-//        }
-//        "generate" -> {
-//            val dbController = DBController(args[1], args[2], args[3], args[4], args[5])
-//                .generateModel()
-//            dbController
-//        }
-//        else -> null
-//    }?.close()
 }

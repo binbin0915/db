@@ -1,7 +1,7 @@
 package com.holland.db.service
 
 import com.holland.db.DBController
-import com.holland.db.FileWriteUtil
+import com.holland.util.FileWriteUtil
 import java.io.File
 
 interface ModelGenerator {
