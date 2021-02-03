@@ -1,18 +1,15 @@
 package com.holland.db.service
 
-import java.util.*
-
 interface FetchTables {
-    fun execute()
+    fun execute(): List<TableTemplate>
 }
 
 class TableTemplate(
-    private val name: String,
-    private val type: String,
-    private val comment: String?
+    val name: String,
+    val type: String?,
+    val comment: String?
 ) {
-    fun print() {
-        Formatter(System.out)
-            .format("name:%-20s\ttype:%-5s\t\tcomment:%-30s\n", name, type, comment)
+    override fun toString(): String {
+        return "TableTemplate(name='$name', type='$type', comment=$comment)"
     }
 }

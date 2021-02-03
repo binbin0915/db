@@ -6,16 +6,19 @@ import com.holland.db.service.TableTemplate
 
 @Suppress("unused", "SqlDialectInspection", "SqlNoDataSourceInspection")
 class OracleFetchTablesImpl(private val dbController: DBController) : FetchTables {
-    override fun execute() {
+    override fun execute(): List<TableTemplate> {
+        val result = mutableListOf<TableTemplate>()
         val statement = dbController.connection.prepareStatement("select * from user_tab_comments")
         statement.execute()
         statement.resultSet.apply {
             while (next()) {
-                TableTemplate(
-                    getString("table_name"),
-                    getString("table_type"),
-                    getString("comments")
-                ).print()
+                result.add(
+                    TableTemplate(
+                        getString("table_name"),
+                        getString("table_type"),
+                        getString("comments")
+                    )
+                )
             }
         }
 
@@ -25,8 +28,9 @@ class OracleFetchTablesImpl(private val dbController: DBController) : FetchTable
             try {
                 statement.close()
             } finally {
-                dbController.connection.close()
+//                dbController.connection.close()
             }
         }
+        return result
     }
 }

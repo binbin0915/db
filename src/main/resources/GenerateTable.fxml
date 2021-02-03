@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import javafx.scene.shape.*?>
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane layoutY="1.0" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.holland.ui.GenerateTable">
+   <children>
+      <MenuBar id="menu_bar" prefHeight="25.0" prefWidth="600.0" />
+      <TableView id="list_column" layoutY="48.0" prefHeight="300.0" prefWidth="500.0" />
+      <HBox layoutY="25.0" prefHeight="23.0" prefWidth="500.0">
+         <children>
+            <ChoiceBox id="choice_table" prefWidth="80.0" />
+            <Button id="btn_add" mnemonicParsing="false" text="新增" />
+            <Button id="btn_del" mnemonicParsing="false" text="删除" />
+            <Button id="btn_submit" mnemonicParsing="false" text="提交" />
+            <Button id="btn_import" mnemonicParsing="false" text="导入" />
+            <Button id="btn_up" mnemonicParsing="false" text="↑" />
+            <Button id="btn_down" mnemonicParsing="false" text="↓" />
+         </children>
+      </HBox>
+      <Text layoutX="5.0" layoutY="367.0" strokeType="OUTSIDE" strokeWidth="0.0" text="表名" />
+      <Text layoutX="5.0" layoutY="391.0" strokeType="OUTSIDE" strokeWidth="0.0" text="备注" />
+      <TextField id="text_table_name" layoutX="32.0" layoutY="350.0" />
+      <TextField id="text_table_comment" layoutX="32.0" layoutY="375.0" />
+      <CheckBox id="box_increment_id" layoutX="202.0" layoutY="354.0" mnemonicParsing="false" text="生成自增id" />
+   </children>
+</AnchorPane>

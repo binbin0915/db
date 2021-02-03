@@ -3,6 +3,5 @@
 /build/
 /build/classes/java/main/
 /.idea
-/gradle
-gradlew
-gradlew.bat
+/temp
+/conf

@@ -1,24 +1,21 @@
 package com.holland.db
 
-import com.holland.db.service.FetchTables
-import com.holland.db.service.ModelGenerator
-import com.holland.db.service.ServiceGenerator
-import com.holland.util.FileWriteUtil
+import com.google.gson.Gson
+import com.google.gson.JsonObject
+import com.holland.db.service.*
+import com.holland.util.FileUtil
 import java.io.File
 import java.sql.Connection
 import java.sql.DriverManager
 
 @Suppress("unused", "JoinDeclarationAndAssignment", "MemberVisibilityCanBePrivate")
 class DBController(val dataSource: String, host: String, port: String, user: String, pwd: String) {
-    lateinit var `package`: String
-    lateinit var tableName: String
     var schema: String? = null
 
     var connection: Connection
     private val classPrefix: String
 
     init {
-        FileWriteUtil.mkdir(rootPath)
         Class.forName(
             when (dataSource) {
                 "ORACLE" -> {
@@ -41,46 +38,90 @@ class DBController(val dataSource: String, host: String, port: String, user: Str
                 }
             }
         )
+
+        val path = "conf"
+        val fileName = "db_connect.conf"
+        FileUtil.mkdir(path)
+        val file = File("$path${File.separatorChar}$fileName")
+        val dbConf = when (file.exists()) {
+            true -> file.readLines()
+            false -> {
+                println("create file: ${file.path}")
+                file.createNewFile()
+                null
+            }
+        }
+
+        FileUtil.newLine2File(JsonObject().let {
+            it.addProperty("dataSource", dataSource)
+            it.addProperty("host", host)
+            it.addProperty("port", port)
+            it.addProperty("user", user)
+            it.addProperty("password", pwd)
+            val json = Gson().toJson(it)
+            if (dbConf?.contains(json) == true) null else json
+        }, path, fileName)
     }
 
-    fun fetchTables(): DBController {
+    /**
+     * @param db:mysql 需要db
+     */
+    fun createTable(table: TableTemplate, columns: List<ColumnTemplate>, incrementId: Boolean, db: String?) {
         with(classPrefix) {
+            Class.forName("com.holland.db.service.impl.${this.toLowerCase()}.${this}CreateTableImpl")
+                .getDeclaredConstructor(this@DBController::class.java)
+                .newInstance(this@DBController)
+                .let {
+                    it as CreateTable
+                    it.execute(table, columns, incrementId, db)
+                }
+        }
+    }
+
+    fun fetchTables(): List<TableTemplate> {
+        return with(classPrefix) {
             Class.forName("com.holland.db.service.impl.${this.toLowerCase()}.${this}FetchTablesImpl")
                 .getDeclaredConstructor(this@DBController::class.java)
                 .newInstance(this@DBController)
-                .apply {
-                    this as FetchTables
-                    execute()
+                .let {
+                    it as FetchTables
+                    it.execute()
                 }
         }
-        return this
     }
 
-    fun generateAll() = this.generateFE().generateBE()
+    fun fetchDbs(): List<String> {
+        val result = mutableListOf<String>()
+        val statement =
+            connection.prepareStatement("SELECT SCHEMA_NAME AS `Database` FROM INFORMATION_SCHEMA.SCHEMATA;")
+        statement.execute()
+        val resultSet = statement.resultSet
+        while (resultSet.next()) {
+            result.add(resultSet.getString(1))
+        }
 
-    fun generateFE() = this
+        try {
+            statement.resultSet.close()
+        } finally {
+            try {
+                statement.close()
+            } finally {
+            }
+        }
 
-    fun generateBE() = this.generateModel().generateService()
+        return result
+    }
 
-    fun generateModel(): DBController {
-        FileWriteUtil.mkdir("$rootPath${File.separatorChar}$pojo")
-        with(classPrefix) {
-            Class.forName("com.holland.db.service.impl.${this.toLowerCase()}.${this}ModelGeneratorImpl")
+    fun fetchColumns(tableName: String): List<ColumnTemplate> {
+        return with(classPrefix) {
+            Class.forName("com.holland.db.service.impl.${this.toLowerCase()}.${this}FetchColumnsImpl")
                 .getDeclaredConstructor(this@DBController::class.java)
                 .newInstance(this@DBController)
-                .apply {
-                    this as ModelGenerator
-                    execute()
+                .let {
+                    it as FetchColumns
+                    it.execute(tableName)
                 }
         }
-        return this
-    }
-
-    fun generateService(): DBController {
-        FileWriteUtil.mkdir("$rootPath${File.separatorChar}$dao")
-        FileWriteUtil.mkdir("$rootPath${File.separatorChar}$dao${File.separatorChar}impl")
-        ServiceGenerator(this).execute()
-        return this
     }
 
     fun close() {
@@ -104,9 +145,7 @@ class DBController(val dataSource: String, host: String, port: String, user: Str
         }
     }
 
-    companion object {
-        const val rootPath = "generate"
-        const val pojo = "pojo"
-        const val dao = "service"
-    }
+    fun generatePojo(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>) =
+        Generator.generatePojo(path, `package`, table, columns)
+
 }

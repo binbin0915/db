@@ -21,5 +21,13 @@ dependencies {
 
     compile(
             "com.google.guava:guava:20.0",
+            'com.google.code.gson:gson:2.8.6',
     )
 }
+
+task cpRes(type: Copy) {
+    from sourceSets.main.resources
+    into sourceSets.main.java.outputDir
+}
+
+processResources.dependsOn(cpRes)
