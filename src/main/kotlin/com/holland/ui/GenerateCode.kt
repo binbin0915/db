@@ -66,33 +66,40 @@ class GenerateCode : Application() {
         btn_gr_be = pane.lookup("#btn_gr_be") as Button
         btn_gr_fe = pane.lookup("#btn_gr_fe") as Button
 
-        val columnName = TableColumn<ColumnTemplate, String>("字段名").also {
-            it.cellValueFactory = PropertyValueFactory("columnName")
-            list_column.columns.add(it)
-        }
-        val dataType = TableColumn<ColumnTemplate, String>("字段类型").let {
-            it.cellValueFactory = PropertyValueFactory("dataType")
-            list_column.columns.add(it)
-        }
-        val charLength = TableColumn<ColumnTemplate, String>("字段长度").let {
-            it.cellValueFactory = PropertyValueFactory("charLength")
-            list_column.columns.add(it)
-        }
-        val nullable = TableColumn<ColumnTemplate, String>("是否可空").let {
-            it.cellValueFactory = PropertyValueFactory("nullable")
-            list_column.columns.add(it)
-        }
-        val dataDefault = TableColumn<ColumnTemplate, String>("默认值").let {
-            it.cellValueFactory = PropertyValueFactory("dataDefault")
-            list_column.columns.add(it)
-        }
-        val comments = TableColumn<ColumnTemplate, String>("备注").let {
-            it.cellValueFactory = PropertyValueFactory("comments")
-            list_column.columns.add(it)
-        }
+
+        with(TableColumn<ColumnTemplate, String>("字段名"), {
+            cellValueFactory = PropertyValueFactory("columnName")
+            list_column.columns.add(this)
+        })
+        with(TableColumn<ColumnTemplate, String>("字段类型"), {
+            cellValueFactory = PropertyValueFactory("dataType")
+            list_column.columns.add(this)
+        })
+        with(TableColumn<ColumnTemplate, String>("字段长度"), {
+            cellValueFactory = PropertyValueFactory("charLength")
+            list_column.columns.add(this)
+        })
+        with(TableColumn<ColumnTemplate, String>("是否可空"), {
+            cellValueFactory = PropertyValueFactory("nullable")
+            list_column.columns.add(this)
+        })
+        with(TableColumn<ColumnTemplate, String>("默认值"), {
+            cellValueFactory = PropertyValueFactory("dataDefault")
+            list_column.columns.add(this)
+        })
+        with(TableColumn<ColumnTemplate, String>("备注"), {
+            cellValueFactory = PropertyValueFactory("comments")
+            list_column.columns.add(this)
+        })
 
         btn_gr_pojo.onAction =
             EventHandler { dbController.generatePojo(text_be.text, text_package.text, table, columns) }
+        btn_gr_dao.onAction =
+            EventHandler { dbController.generateDao(text_be.text, text_package.text, table, columns) }
+        btn_gr_service.onAction =
+            EventHandler { dbController.generateService(text_be.text, text_package.text, table, columns) }
+        btn_gr_control.onAction =
+            EventHandler { dbController.generateControl(text_be.text, text_package.text, table, columns) }
 
         btn_fe.onAction = EventHandler { text_fe.text = UiUtil.openFolderChooser(primaryStage)?.path }
         btn_be.onAction = EventHandler { text_be.text = UiUtil.openFolderChooser(primaryStage)?.path }

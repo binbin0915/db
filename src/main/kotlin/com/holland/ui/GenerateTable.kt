@@ -2,6 +2,9 @@ package com.holland.ui
 
 import com.holland.db.DBController
 import com.holland.db.service.TableTemplate
+import com.holland.db.service.impl.mysql.MysqlUtil
+import com.holland.db.service.impl.oracle.OracleUtil
+import com.sun.javafx.collections.ImmutableObservableList
 import javafx.application.Application
 import javafx.event.EventHandler
 import javafx.fxml.FXMLLoader
@@ -54,93 +57,62 @@ class GenerateTable : Application() {
         CommonControls.initMenu(menu_bar)
         list_column.isEditable = true
 
-        val sequence: TableColumn<ColumnTemplate, Int> = TableColumn("列")
-        sequence.apply {
+        with(TableColumn<ColumnTemplate, Int>("列"), {
             cellValueFactory = PropertyValueFactory("index")
             cellFactory = TextFieldTableCell.forTableColumn(IntegerStringConverter())
-        }
-        val columnName: TableColumn<ColumnTemplate, String> = TableColumn("字段名")
-        columnName.apply {
+            list_column.columns.add(this)
+        })
+        with(TableColumn<ColumnTemplate, String>("字段名"), {
             cellValueFactory = PropertyValueFactory("columnName")
             cellFactory = TextFieldTableCell.forTableColumn()
             onEditCommit =
                 EventHandler { t -> t.tableView.items[t.tablePosition.row].columnName = t.newValue }
-        }
-        val dataType: TableColumn<ColumnTemplate, String> = TableColumn("字段类型")
-        dataType.apply {
-            cellValueFactory = PropertyValueFactory("dataType")
-            cellFactory = TextFieldTableCell.forTableColumn()
-            onEditCommit =
-                EventHandler { t -> t.tableView.items[t.tablePosition.row].dataType = t.newValue }
-        }
-        val charLength: TableColumn<ColumnTemplate, Long> = TableColumn("字段长度")
-        charLength.apply {
+            list_column.columns.add(this)
+        })
+        with(TableColumn<ColumnTemplate, ChoiceBox<String>>("字段类型"), {
+            cellValueFactory = PropertyValueFactory("dbDataType")
+            list_column.columns.add(this)
+        })
+        with(TableColumn<ColumnTemplate, Long>("字段长度"), {
             cellValueFactory = PropertyValueFactory("charLength")
             cellFactory = TextFieldTableCell.forTableColumn(LongStringConverter())
             onEditCommit =
                 EventHandler { t -> t.tableView.items[t.tablePosition.row].charLength = t.newValue }
-        }
-        val nullable: TableColumn<ColumnTemplate, CheckBox> = TableColumn("是否可空")
-        nullable.apply {
+            list_column.columns.add(this)
+        })
+        with(TableColumn<ColumnTemplate, CheckBox>("是否可空"), {
             cellValueFactory = PropertyValueFactory("nullable")
-        }
-        val pk: TableColumn<ColumnTemplate, CheckBox> = TableColumn("是否主键")
-        pk.apply {
+            list_column.columns.add(this)
+        })
+        with(TableColumn<ColumnTemplate, CheckBox>("是否主键"), {
             cellValueFactory = PropertyValueFactory("pk")
-        }
-        val dataDefault: TableColumn<ColumnTemplate, String> = TableColumn("默认值")
-        dataDefault.apply {
+            list_column.columns.add(this)
+        })
+        with(TableColumn<ColumnTemplate, String>("默认值"), {
             cellValueFactory = PropertyValueFactory("dataDefault")
             cellFactory = TextFieldTableCell.forTableColumn()
             onEditCommit =
                 EventHandler { t -> t.tableView.items[t.tablePosition.row].dataDefault = t.newValue }
-        }
-        val comments: TableColumn<ColumnTemplate, String> = TableColumn("备注")
-        comments.apply {
+            list_column.columns.add(this)
+        })
+        with(TableColumn<ColumnTemplate, String>("备注"), {
             cellValueFactory = PropertyValueFactory("comments")
             cellFactory = TextFieldTableCell.forTableColumn()
             onEditCommit =
                 EventHandler { t -> t.tableView.items[t.tablePosition.row].comments = t.newValue }
-        }
-        list_column.columns.addAll(
-            sequence,
-            columnName,
-            dataType,
-            charLength,
-            nullable,
-            pk,
-            dataDefault,
-            comments
-        )
-        /*todo 测试 初始数据*/list_column.items.add(
-            ColumnTemplate(
-                list_column.items.size + 1,
-                "a",
-                "VARCHAR",
-                10,
-                CheckBox(),
-                "1",
-                "1", CheckBox()
-            )
-        )
-        /*todo 测试 初始数据*/list_column.items.add(
-            ColumnTemplate(
-                list_column.items.size + 1,
-                "b",
-                "VARCHAR",
-                10,
-                CheckBox(),
-                "1",
-                "1", CheckBox()
-            )
-        )
+            list_column.columns.add(this)
+        })
 
+        val dbTypes = when (dbController.dataSource) {
+            "MYSQL" -> MysqlUtil.dbType2JavaType.keys.toTypedArray()
+            else -> OracleUtil.dbType2JavaType.keys.toTypedArray()
+        }
         btn_add.onAction = EventHandler {
             list_column.items.add(
                 ColumnTemplate(
                     list_column.items.size + 1,
                     "",
-                    "",
+                    ChoiceBox(ImmutableObservableList(*dbTypes)),
                     null,
                     CheckBox(),
                     "",
@@ -172,7 +144,11 @@ class GenerateTable : Application() {
                 list_column.items.map {
                     com.holland.db.service.ColumnTemplate(
                         it.columnName,
-                        it.dataType,
+                        it.dbDataType.value,
+                        when (dbController.dataSource) {
+                            "MYSQL" -> MysqlUtil.dbType2JavaType(it.dbDataType.value)
+                            else -> OracleUtil.dbType2JavaType(it.dbDataType.value)
+                        },
                         it.charLength ?: 0,
                         it.nullable.isSelected,
                         it.dataDefault,
@@ -226,7 +202,7 @@ class GenerateTable : Application() {
     class ColumnTemplate(
         var index: Int,
         var columnName: String,
-        var dataType: String,
+        var dbDataType: ChoiceBox<String>,
         var charLength: Long?,
         var nullable: CheckBox,
         var dataDefault: String?,
@@ -234,7 +210,7 @@ class GenerateTable : Application() {
         var pk: CheckBox,
     ) {
         override fun toString(): String {
-            return "ColumnTemplate(index=$index, columnName='$columnName', dataType='$dataType', charLength=$charLength, nullable=${nullable.isSelected}, dataDefault=$dataDefault, comments=$comments, pk=${pk.isSelected})"
+            return "ColumnTemplate(index=$index, columnName='$columnName', dataType='$dbDataType', charLength=$charLength, nullable=${nullable.isSelected}, dataDefault=$dataDefault, comments=$comments, pk=${pk.isSelected})"
         }
     }
 }

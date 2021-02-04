@@ -49,8 +49,7 @@ class MysqlCreateTableImpl(private val dbController: DBController) : CreateTable
         builder.appendLine(")ENGINE = INNODB DEFAULT CHARSET = utf8 COMMENT = '").append(template.comment).append("'")
     }
 
-    // TODO: 2021/2/3 默认写入的数据类型是mysql的类型
     private fun getDataType(column: ColumnTemplate): String {
-        return "${column.dataType}(${column.charLength})"
+        return "${column.dbDataType}(${column.charLength})"
     }
 }

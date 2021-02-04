@@ -1,6 +1,9 @@
 package com.holland.ui
 
+import com.google.gson.JsonObject
+import com.google.gson.JsonParser
 import com.holland.db.DBController
+import com.holland.util.FileUtil
 import com.holland.util.RegUtil
 import com.sun.javafx.collections.ImmutableObservableList
 import javafx.application.Application
@@ -26,11 +29,11 @@ class Connect : Application() {
         pane.vgap = 10.0
         pane.padding = Insets(25.0, 25.0, 25.0, 25.0)
 
-        val databaseList = ImmutableObservableList("oracle", "mysql")
-        val choice_database = ChoiceBox<String>()
-        choice_database.setItems(databaseList)
-        choice_database.setValue("oracle")
-        pane.add(choice_database, 0, row++)
+        val choice_database = ChoiceBox(ImmutableObservableList("oracle", "mysql"))
+        choice_database.value = "oracle"
+        val choice_history = ChoiceBox(ImmutableObservableList("历史记录", *FileUtil.readFile("conf", "db_connect.conf")))
+        pane.add(choice_database, 0, row)
+        pane.add(choice_history, 1, row++)
 
         val label_host = Label("host")
         val text_host = TextField()
@@ -63,19 +66,18 @@ class Connect : Application() {
         btn_2_table.onAction =
             onConnectTable(text_host, text_port, choice_database, text_user, text_password, primaryStage)
 
-        // TODO: 2021/2/2 测试数据 ORACLE
-        choice_database.value = "oracle"
-        text_host.text = "11.101.2.195"
-        text_port.text = "1521"
-        text_user.text = "yb_acd"
-        text_password.text = "yb_acd"
-
-        // TODO: 2021/2/2 测试数据 MYSQL
-//        choice_database.value = "mysql"
-//        text_host.text = "localhost"
-//        text_port.text = "3306"
-//        text_user.text = "root"
-//        text_password.text = "root"
+        choice_history.apply {
+            maxWidth = 80.0
+            value = "历史记录"
+            onAction = EventHandler {
+                val jsonElement = JsonParser.parseString(selectionModel.selectedItem) as JsonObject
+                choice_database.value = jsonElement.get("dataSource").asString.toLowerCase()
+                text_host.text = jsonElement.get("host").asString
+                text_port.text = jsonElement.get("port").asString
+                text_user.text = jsonElement.get("user").asString
+                text_password.text = jsonElement.get("password").asString
+            }
+        }
 
         primaryStage!!.scene = Scene(pane, 270.0, 200.0)
         primaryStage.title = "数据库代码生成工具"
@@ -92,14 +94,14 @@ class Connect : Application() {
     ): EventHandler<ActionEvent> = EventHandler {
         if (RegUtil.hostCheck(text_host.text).not()) {
             Alert(Alert.AlertType.ERROR).apply {
-                contentText = "host format error"
+                contentText = "host 为空"
                 show()
                 return@EventHandler
             }
         }
         if (RegUtil.portCheck(text_port.text).not()) {
             Alert(Alert.AlertType.ERROR).apply {
-                contentText = "port format error"
+                contentText = "port 为空"
                 show()
                 return@EventHandler
             }
@@ -125,7 +127,7 @@ class Connect : Application() {
                 primaryStage!!.close()
             } else {
                 Alert(Alert.AlertType.ERROR).apply {
-                    contentText = "database connect error!"
+                    contentText = "数据库连接异常!"
                     show()
                     return@EventHandler
                 }
@@ -149,14 +151,14 @@ class Connect : Application() {
     ): EventHandler<ActionEvent> = EventHandler {
         if (RegUtil.hostCheck(text_host.text).not()) {
             Alert(Alert.AlertType.ERROR).apply {
-                contentText = "host format error"
+                contentText = "host 为空"
                 show()
                 return@EventHandler
             }
         }
         if (RegUtil.portCheck(text_port.text).not()) {
             Alert(Alert.AlertType.ERROR).apply {
-                contentText = "port format error"
+                contentText = "port 为空"
                 show()
                 return@EventHandler
             }
@@ -182,7 +184,7 @@ class Connect : Application() {
                 primaryStage!!.close()
             } else {
                 Alert(Alert.AlertType.ERROR).apply {
-                    contentText = "database connect error!"
+                    contentText = "数据库连接异常!"
                     show()
                     return@EventHandler
                 }

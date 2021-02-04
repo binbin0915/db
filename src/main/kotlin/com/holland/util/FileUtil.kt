@@ -15,7 +15,7 @@ object FileUtil {
         }
     }
 
-    fun newLine2File(string: String?, path: String, fileName: String) {
+    fun newLine2File(content: String?, path: String, fileName: String) {
         mkdir(path)
         val file = File("$path${File.separatorChar}$fileName")
         when (file.exists()) {
@@ -25,6 +25,26 @@ object FileUtil {
                 file.createNewFile()
             }
         }
-        string?.let { file.appendText(it + System.getProperty("line.separator")) }
+        content?.let { file.appendText(it + System.getProperty("line.separator")) }
+    }
+
+    fun newFile(content: String?, path: String, fileName: String) {
+        mkdir(path)
+        val file = File("$path${File.separatorChar}$fileName")
+        when (file.exists()) {
+            true -> println("rebuild file: ${file.path}")
+            false -> {
+                println("create file: ${file.path}")
+                file.createNewFile()
+            }
+        }
+        content?.let { file.writeText(it + System.getProperty("line.separator")) }
+    }
+
+    fun readFile(path: String, fileName: String): Array<String> {
+        val file = File("$path${File.separatorChar}$fileName")
+        return if (file.exists()) {
+            file.readLines().toTypedArray()
+        } else arrayOf()
     }
 }

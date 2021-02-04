@@ -148,4 +148,19 @@ class DBController(val dataSource: String, host: String, port: String, user: Str
     fun generatePojo(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>) =
         Generator.generatePojo(path, `package`, table, columns)
 
+    fun generateDao(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>) =
+        Generator.generateDao(path, `package`, table, columns)
+
+    fun generateService(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>) =
+        Generator.generateService(path, `package`, table, columns)
+
+    fun generateControl(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>) =
+        Generator.generateControl(path, `package`, table, columns)
+
+    fun generateBe(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>) {
+        generatePojo(path, `package`, table, columns)
+        generateDao(path, `package`, table, columns)
+        generateService(path, `package`, table, columns)
+        generateControl(path, `package`, table, columns)
+    }
 }

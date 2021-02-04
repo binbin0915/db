@@ -6,16 +6,6 @@ import com.holland.db.service.FetchColumns
 
 class OracleFetchColumnsImpl(private val dbController: DBController) : FetchColumns {
 
-    private fun dataTypeConvert(dataType: String): String {
-        return when (dataType) {
-            "CHAR", "VARCHAR2", "NVARCHAR2" -> "String"
-            "DATE" -> "Date"
-            "NUMBER" -> "Long"
-            "CLOB" -> "Object"
-            else -> "Object"
-        }
-    }
-
     override fun execute(tableName: String): List<ColumnTemplate> {
         val result = mutableListOf<ColumnTemplate>()
 
@@ -31,7 +21,8 @@ class OracleFetchColumnsImpl(private val dbController: DBController) : FetchColu
             resultSet.run {
                 ColumnTemplate(
                     getString("COLUMN_NAME"),
-                    dataTypeConvert(getString("data_type")),
+                    getString("data_type"),
+                    OracleUtil.dbType2JavaType(getString("data_type")),
                     getLong("char_length"),
                     "Y" == getString("nullable"),
                     dataDefault,
@@ -41,6 +32,8 @@ class OracleFetchColumnsImpl(private val dbController: DBController) : FetchColu
             }.also { result.add(it) }
         }
 
+        getPk(result, dbController, tableName)
+
         try {
             resultSet.close()
         } finally {
@@ -48,5 +41,29 @@ class OracleFetchColumnsImpl(private val dbController: DBController) : FetchColu
         }
 
         return result
+    }
+
+    private fun getPk(result: List<ColumnTemplate>, dbController: DBController, tableName: String) {
+        val sql = """
+ select COLUMN_NAME
+from user_cons_columns a, user_constraints b 
+where a.constraint_name = b.constraint_name 
+  and b.constraint_type = 'P' and a.table_name = ?"""
+        val statement = dbController.connection.prepareStatement(sql)
+        statement.setString(1, tableName)
+        statement.execute()
+        val resultSet = statement.resultSet
+
+        while (resultSet.next()) {
+            resultSet.run {
+                result.first { it.columnName == getString("COLUMN_NAME") }.pk = true
+            }
+        }
+
+        try {
+            resultSet.close()
+        } finally {
+            statement.close()
+        }
     }
 }

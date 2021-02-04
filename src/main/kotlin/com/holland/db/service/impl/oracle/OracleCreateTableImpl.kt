@@ -40,8 +40,7 @@ class OracleCreateTableImpl(private val dbController: DBController) : CreateTabl
         }
     }
 
-    // TODO: 2021/2/3 默认写入的数据类型是mysql的类型
     private fun getDataType(column: ColumnTemplate): String {
-        return "${column.dataType}(${column.charLength})"
+        return "${column.dbDataType}(${column.charLength})"
     }
 }
