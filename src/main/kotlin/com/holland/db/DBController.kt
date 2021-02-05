@@ -16,28 +16,26 @@ class DBController(val dataSource: String, host: String, port: String, user: Str
     private val classPrefix: String
 
     init {
-        Class.forName(
-            when (dataSource) {
-                "ORACLE" -> {
-                    classPrefix = "Oracle"
-                    connection = DriverManager.getConnection("jdbc:oracle:thin:@${host}:${port}/orcl", user, pwd)
-                    "oracle.jdbc.driver.OracleDriver"
-                }
-                "MYSQL" -> {
-                    classPrefix = "Mysql"
-                    connection =
-                        DriverManager.getConnection(
-                            "jdbc:mysql://${host}:${port}/mysql?useUnicode=true&characterEncoding=utf8&useSSL=false&autoReconnect=true&serverTimezone=Asia/Shanghai",
-                            user,
-                            pwd
-                        )
-                    "com.mysql.cj.jdbc.Driver"
-                }
-                else -> {
-                    throw RuntimeException("not support [$dataSource]")
-                }
+        when (dataSource) {
+            "ORACLE" -> {
+                Class.forName("oracle.jdbc.driver.OracleDriver")
+                classPrefix = "Oracle"
+                connection = DriverManager.getConnection("jdbc:oracle:thin:@${host}:${port}/orcl", user, pwd)
             }
-        )
+            "MYSQL" -> {
+                Class.forName("com.mysql.cj.jdbc.Driver")
+                classPrefix = "Mysql"
+                connection =
+                    DriverManager.getConnection(
+                        "jdbc:mysql://${host}:${port}/mysql?useUnicode=true&characterEncoding=utf8&useSSL=false&autoReconnect=true&serverTimezone=Asia/Shanghai",
+                        user,
+                        pwd
+                    )
+            }
+            else -> {
+                throw RuntimeException("not support [$dataSource]")
+            }
+        }
 
         val path = "conf"
         val fileName = "db_connect.conf"

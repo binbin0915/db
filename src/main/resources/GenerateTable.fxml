@@ -8,11 +8,11 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane layoutY="1.0" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.holland.ui.GenerateTable">
+<AnchorPane layoutY="1.0" prefHeight="400.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.holland.ui.GenerateTable">
    <children>
-      <MenuBar id="menu_bar" prefHeight="25.0" prefWidth="600.0" />
-      <TableView id="list_column" layoutY="48.0" prefHeight="300.0" prefWidth="500.0" />
-      <HBox layoutY="25.0" prefHeight="23.0" prefWidth="500.0">
+      <MenuBar id="menu_bar" prefHeight="25.0" prefWidth="800.0" />
+      <TableView id="list_column" layoutY="48.0" prefHeight="300.0" prefWidth="800.0" />
+      <HBox layoutY="25.0" prefHeight="23.0" prefWidth="800.0">
          <children>
             <ChoiceBox id="choice_table" prefWidth="80.0" />
             <Button id="btn_add" mnemonicParsing="false" text="新增" />

@@ -104,7 +104,7 @@ class GenerateCode : Application() {
         btn_fe.onAction = EventHandler { text_fe.text = UiUtil.openFolderChooser(primaryStage)?.path }
         btn_be.onAction = EventHandler { text_be.text = UiUtil.openFolderChooser(primaryStage)?.path }
 
-        CommonControls.initMenu(menu_bar)
+        UiUtil.initMenu(menu_bar)
 
         tables = dbController.fetchTables().let {
             it.forEach { table -> list_table.items.add(table.name) }

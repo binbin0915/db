@@ -79,7 +79,7 @@ class Connect : Application() {
             }
         }
 
-        primaryStage!!.scene = Scene(pane, 270.0, 200.0)
+        primaryStage!!.scene = Scene(pane, 330.0, 250.0)
         primaryStage.title = "数据库代码生成工具"
         primaryStage.show()
     }
@@ -190,6 +190,7 @@ class Connect : Application() {
                 }
             }
         } catch (e: Exception) {
+            e.printStackTrace()
             Alert(Alert.AlertType.ERROR).apply {
                 contentText = "${e.javaClass.name}: ${e.message}"
                 show()

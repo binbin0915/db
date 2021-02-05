@@ -4,6 +4,7 @@ import com.holland.db.DBController
 import com.holland.db.service.TableTemplate
 import com.holland.db.service.impl.mysql.MysqlUtil
 import com.holland.db.service.impl.oracle.OracleUtil
+import com.holland.util.UiUtil
 import com.sun.javafx.collections.ImmutableObservableList
 import javafx.application.Application
 import javafx.event.EventHandler
@@ -14,7 +15,6 @@ import javafx.scene.control.*
 import javafx.scene.control.cell.PropertyValueFactory
 import javafx.scene.control.cell.TextFieldTableCell
 import javafx.stage.Stage
-import javafx.util.converter.IntegerStringConverter
 import javafx.util.converter.LongStringConverter
 
 @Suppress("PrivatePropertyName")
@@ -37,7 +37,7 @@ class GenerateTable : Application() {
     override fun start(primaryStage: Stage?) {
         val dbController = primaryStage!!.properties["dbController"] as DBController
         val pane = FXMLLoader.load<Parent>(javaClass.getResource("/GenerateTable.fxml"))
-        primaryStage.scene = Scene(pane, 600.0, 400.0)
+        primaryStage.scene = Scene(pane, 800.0, 400.0)
         primaryStage.title = "数据库代码生成工具"
         primaryStage.show()
 
@@ -54,12 +54,12 @@ class GenerateTable : Application() {
         text_table_comment = pane.lookup("#text_table_comment") as TextField
         box_increment_id = pane.lookup("#box_increment_id") as CheckBox
 
-        CommonControls.initMenu(menu_bar)
+        UiUtil.initMenu(menu_bar)
         list_column.isEditable = true
 
-        with(TableColumn<ColumnTemplate, Int>("列"), {
+        // TODO: 2021/2/5 必须要回车才能有值
+        with(TableColumn<ColumnTemplate, Int>("序号"), {
             cellValueFactory = PropertyValueFactory("index")
-            cellFactory = TextFieldTableCell.forTableColumn(IntegerStringConverter())
             list_column.columns.add(this)
         })
         with(TableColumn<ColumnTemplate, String>("字段名"), {
