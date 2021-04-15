@@ -149,6 +149,13 @@ class Connect : Application() {
         text_password: TextField,
         primaryStage: Stage?,
     ): EventHandler<ActionEvent> = EventHandler {
+        /*todo 功能关闭*/
+        Alert(Alert.AlertType.INFORMATION).apply {
+            contentText = "功能暂时关闭"
+            show()
+            return@EventHandler
+        }
+
         if (RegUtil.hostCheck(text_host.text).not()) {
             Alert(Alert.AlertType.ERROR).apply {
                 contentText = "host 为空"

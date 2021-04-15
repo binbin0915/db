@@ -11,15 +11,15 @@ object OracleUtil {
     }
 
     val dbType2JavaType = mapOf(
-        Pair("CHAR", "String"),
-        Pair("VARCHAR2", "String"),
-        Pair("NVARCHAR2", "String"),
+        "CHAR" to "String",
+        "VARCHAR2" to "String",
+        "NVARCHAR2" to "String",
 
-        Pair("DATE", "Date"),
+        "DATE" to "Date",
 
-        Pair("NUMBER", "Long"),
+        "NUMBER" to "Long",
 
-        Pair("BLOB", "Object"),
-        Pair("CLOB", "Object"),
+        "BLOB" to "Object",
+        "CLOB" to "Object",
     )
 }

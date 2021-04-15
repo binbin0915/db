@@ -167,43 +167,34 @@ object Generator {
 
         pojoBuilder.append(
             """|package $composePackage.pojo;
-
-        import lombok.Data;
-        import lombok.experimental.Accessors;
-        import org.springframework.format.annotation.DateTimeFormat;
-        import javax.validation.constraints.*;
-        import java.math.BigDecimal;
-        import java.util.Date;
-        import io.swagger.annotations.ApiModelProperty;
-        """.trimIndent()
+               |
+               |import lombok.Data;
+               |import lombok.experimental.Accessors;
+               |import org.springframework.format.annotation.DateTimeFormat;
+               |import javax.validation.constraints.*;
+               |import java.math.BigDecimal;
+               |import java.util.Date;
+               |import io.swagger.annotations.ApiModelProperty;
+               |
+               |/**
+               | * comment: ${table.comment}
+               | */
+               |@Data
+               |@Accessors(chain = true)
+               |public class $className {
+               |""".trimMargin()
         )
-
-        pojoBuilder.append(
-            """
-
-                        /**
-                         * comment: ${table.comment}
-                         */
-                         """.trimIndent()
-        )
-            .append("\n@Data")
-            .append("\n@Accessors(chain = true)")
-            .append("\npublic class $className {")
 
         columns.forEach {
-
             pojoBuilder.append(
-                """
-    /**
-     * ${it.comments}
-     */
-"""
+                """|    /**
+                   |     * ${it.comments}
+                   |     */
+                   |    @ApiModelProperty(value = "${it.comments}")${if (it.nullable) "" else "\n\t@NotNull"}${if ("Date" == it.javaDataType) "\n\t@DateTimeFormat(pattern = \"yyyy-MM-dd HH:mm:ss\")" else ""}${if (it.charLength > 0) "\n\t@Size(max = ${it.charLength}, message = \"${it.columnName} 长度不能大于${it.charLength}\")" else ""}
+                   |    private ${it.javaDataType} ${UPPER_UNDERSCORE.to(LOWER_CAMEL, it.columnName)};
+                   |
+                   |""".trimMargin()
             )
-                .append("\t@ApiModelProperty(value=\"${it.comments}\")\n")
-                .append(if (it.nullable) "" else "\t@NotNull\n")
-                .append(if ("Date" == it.dbDataType) "\t@DateTimeFormat(pattern = \"yyyy-MM-dd HH:mm:ss\")\n" else "")
-                .append("\t@Size(max = ${it.charLength}, message = \"${it.columnName} 长度不能大于${it.charLength}\")\n")
-                .append("\tprivate ${it.dbDataType} ${UPPER_UNDERSCORE.to(LOWER_CAMEL, it.columnName)};\n")
         }
 
         pojoBuilder.append("}")

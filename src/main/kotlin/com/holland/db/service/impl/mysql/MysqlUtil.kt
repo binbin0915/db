@@ -11,22 +11,22 @@ object MysqlUtil {
     }
 
     val dbType2JavaType = mapOf(
-        Pair("varchar", "String"),
-        Pair("char", "String"),
-        Pair("text", "String"),
-        Pair("mediumtext", "String"),
-        Pair("longtext", "String"),
-        Pair("String", "String"),
+        "varchar" to "String",
+        "char" to "String",
+        "text" to "String",
+        "mediumtext" to "String",
+        "longtext" to "String",
+        "String" to "String",
 
-        Pair("datetime", "Date"),
-        Pair("timestamp", "Date"),
-        Pair("date", "Date"),
+        "datetime" to "Date",
+        "timestamp" to "Date",
+        "date" to "Date",
 
-        Pair("tinyint", "Long"),
-        Pair("int", "Long"),
-        Pair("bigint", "Long"),
+        "tinyint" to "Long",
+        "int" to "Long",
+        "bigint" to "Long",
 
-        Pair("double", "BigDecimal"),
-        Pair("float", "BigDecimal"),
+        "double" to "BigDecimal",
+        "float" to "BigDecimal",
     )
 }

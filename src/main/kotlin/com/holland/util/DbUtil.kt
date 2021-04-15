@@ -56,4 +56,21 @@ object DbUtil {
         }
         return result.toList()
     }
+
+    /**
+     * @param resultSet     resultSet from sql query
+     */
+    fun getResult(
+        resultSet: ResultSet
+    ): List<Map<String, *>> {
+        val result = mutableListOf<Map<String, *>>()
+        while (resultSet.next()) {
+            val item = mutableMapOf<String, Any>()
+            for (i in 1..resultSet.metaData.columnCount) {
+                val columnName = resultSet.metaData.getColumnName(i)
+                item[columnName] = resultSet.getObject(i)
+            }
+        }
+        return result.toList()
+    }
 }

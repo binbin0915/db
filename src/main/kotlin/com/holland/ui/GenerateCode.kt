@@ -72,7 +72,7 @@ class GenerateCode : Application() {
             list_column.columns.add(this)
         }
         with(TableColumn<ColumnTemplate, String>("字段类型")) {
-            cellValueFactory = PropertyValueFactory("dataType")
+            cellValueFactory = PropertyValueFactory("dbDataType")
             list_column.columns.add(this)
         }
         with(TableColumn<ColumnTemplate, String>("字段长度")) {
