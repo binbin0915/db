@@ -37,31 +37,28 @@ object Generator {
         val className = UPPER_UNDERSCORE.to(UPPER_CAMEL, table.name)
         val pk = if (null == pkColumn) "key" else UPPER_UNDERSCORE.to(LOWER_CAMEL, pkColumn.columnName)
         StringBuilder().append(
-            """
-        package ${`package`}.dao;
+            """|package ${`package`}.dao;
 
-        import ${`package`}.pojo.$className;
-        import org.apache.ibatis.annotations.Mapper;
-
-        @Mapper
-        public interface ${className}Dao {
-            $className selectByPrimaryKey(String $pk);
-            
-            int deleteByPrimaryKey(String $pk);
-            
-            int updateByPrimaryKeySelective(${className} record);
-            
-            int insertSelective($className record);
+               |import ${`package`}.pojo.$className;
+               |import org.apache.ibatis.annotations.Mapper;
+        
+               |@Mapper
+               |public interface ${className}Dao {
+               |    $className selectByPrimaryKey(String $pk);
+                    
+               |    int deleteByPrimaryKey(String $pk);
+                    
+               |    int updateByPrimaryKeySelective(${className} record);
+                    
+               |    int insertSelective($className record);
+               |}""".trimMargin()
+        ).run {
+            FileUtil.newFile(
+                this.toString(),
+                path,
+                "${className}Dao.java"
+            )
         }
-        """.trimIndent()
-        )
-            .run {
-                FileUtil.newFile(
-                    this.toString(),
-                    path,
-                    "${className}Dao.java"
-                )
-            }
     }
 
     private fun daoXml(
@@ -169,8 +166,7 @@ object Generator {
         val className = UPPER_UNDERSCORE.to(UPPER_CAMEL, table.name)
 
         pojoBuilder.append(
-            """
-        package $composePackage.pojo;
+            """|package $composePackage.pojo;
 
         import lombok.Data;
         import lombok.experimental.Accessors;
