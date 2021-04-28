@@ -59,7 +59,11 @@ class Connect : Application() {
         val btn_2_table = Button("生成表")
         val hbBtn = HBox(10.0)
         hbBtn.alignment = Pos.BOTTOM_RIGHT
-        hbBtn.children.addAll(btn_2_code, btn_2_table)
+        /**
+         * 关闭'生成表'功能
+         */
+//        hbBtn.children.addAll(btn_2_code, btn_2_table)
+        hbBtn.children.addAll(btn_2_code)
         pane.add(hbBtn, 1, row++)
         btn_2_code.onAction =
             onConnectCode(text_host, text_port, choice_database, text_user, text_password, primaryStage)
@@ -149,13 +153,6 @@ class Connect : Application() {
         text_password: TextField,
         primaryStage: Stage?,
     ): EventHandler<ActionEvent> = EventHandler {
-        /*todo 功能关闭*/
-        Alert(Alert.AlertType.INFORMATION).apply {
-            contentText = "功能暂时关闭"
-            show()
-            return@EventHandler
-        }
-
         if (RegUtil.hostCheck(text_host.text).not()) {
             Alert(Alert.AlertType.ERROR).apply {
                 contentText = "host 为空"
