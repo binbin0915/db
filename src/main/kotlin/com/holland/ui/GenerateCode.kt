@@ -28,7 +28,7 @@ class GenerateCode : Application() {
     private lateinit var btn_be: Button
 
     private lateinit var btn_gr_pojo: Button
-    private lateinit var btn_gr_dao: Button
+    private lateinit var btn_gr_mapper: Button
     private lateinit var btn_gr_service: Button
     private lateinit var btn_gr_control: Button
     private lateinit var btn_gr_be: Button
@@ -60,7 +60,7 @@ class GenerateCode : Application() {
         btn_be = pane.lookup("#btn_be") as Button
 
         btn_gr_pojo = pane.lookup("#btn_gr_pojo") as Button
-        btn_gr_dao = pane.lookup("#btn_gr_dao") as Button
+        btn_gr_mapper = pane.lookup("#btn_gr_mapper") as Button
         btn_gr_service = pane.lookup("#btn_gr_service") as Button
         btn_gr_control = pane.lookup("#btn_gr_control") as Button
         btn_gr_be = pane.lookup("#btn_gr_be") as Button
@@ -94,8 +94,8 @@ class GenerateCode : Application() {
 
         btn_gr_pojo.onAction =
             EventHandler { dbController.generatePojo(text_be.text, text_package.text, table, columns) }
-        btn_gr_dao.onAction =
-            EventHandler { dbController.generateDao(text_be.text, text_package.text, table, columns) }
+        btn_gr_mapper.onAction =
+            EventHandler { dbController.generateMapper(text_be.text, text_package.text, table, columns) }
         btn_gr_service.onAction =
             EventHandler { dbController.generateService(text_be.text, text_package.text, table, columns) }
         btn_gr_control.onAction =

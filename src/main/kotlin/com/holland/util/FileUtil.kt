@@ -2,6 +2,56 @@ package com.holland.util
 
 import java.io.File
 
+//fun main() {
+//    val readFile = FileUtil.readFile("C:\\Users\\xd\\Desktop", "result.txt")
+//
+//    val mutableListOf = mutableListOf("")
+//    var i = 0
+//    readFile.forEachIndexed { index: Int, s: String ->
+//        run {
+//            i++
+//            if (i == 3) {
+//                mutableListOf[mutableListOf.lastIndex] = mutableListOf.last() + ("$s,")
+//                mutableListOf.add("")
+//                i = 0
+//            } else {
+//                mutableListOf[mutableListOf.lastIndex] = mutableListOf.last() + ("$s,")
+//            }
+//        }
+//    }
+//
+//    mutableListOf.forEachIndexed { index: Int, s: String ->
+//        run {
+//            if (mutableListOf.size - 1 != index) {
+//                val split = s.split(",")
+//                val name = split[0]
+//                val nameCN = split[1]
+//                val type = split[2]
+//                val type_ = if (type == "char" || type == "varchar2" || type == "CHAR" || type == "Varchar2") {
+//                    "String"
+//                } else if (type == "date") {
+//                    "Date"
+//                } else if (type == "number") {
+//                    "Long"
+//                } else {
+//                    type
+//                }
+//
+//                println(
+//                    """
+//                    /**
+//                    * ${nameCN}
+//                    */
+//                    private ${type_} ${name.toLowerCase()};
+//                """.trimIndent()
+//                )
+//            }
+//        }
+//    }
+//
+//    val j = 0
+//}
+
 object FileUtil {
 
     fun mkdir(path: String) {

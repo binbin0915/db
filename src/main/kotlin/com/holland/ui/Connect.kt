@@ -5,6 +5,7 @@ import com.google.gson.JsonParser
 import com.holland.db.DBController
 import com.holland.util.FileUtil
 import com.holland.util.RegUtil
+import com.holland.util.TimeUtil
 import com.sun.javafx.collections.ImmutableObservableList
 import javafx.application.Application
 import javafx.event.ActionEvent
@@ -29,7 +30,7 @@ class Connect : Application() {
         pane.vgap = 10.0
         pane.padding = Insets(25.0, 25.0, 25.0, 25.0)
 
-        val choice_database = ChoiceBox(ImmutableObservableList("oracle", "mysql"))
+        val choice_database = ChoiceBox(ImmutableObservableList("oracle", "mysql"/*, "postgre"*/))
         choice_database.value = "oracle"
         val choice_history = ChoiceBox(ImmutableObservableList("历史记录", *FileUtil.readFile("conf", "db_connect.conf")))
         pane.add(choice_database, 0, row)
@@ -112,30 +113,32 @@ class Connect : Application() {
         }
 
         try {
-            val dbController = DBController(
-                choice_database.value.toUpperCase(),
-                text_host.text,
-                text_port.text,
-                text_user.text,
-                text_password.text
-            )
-            Runtime.getRuntime().addShutdownHook(Thread {
-                dbController.close()
-            })
-            if (dbController.ping()) {
-                GenerateCode().start(Stage()
-                    .apply {
-                        properties["dbController"] = dbController
-                    }
+            TimeUtil.printMethodTime("创建数据库连接") {
+                val dbController = DBController(
+                    choice_database.value.toUpperCase(),
+                    text_host.text,
+                    text_port.text,
+                    text_user.text,
+                    text_password.text
                 )
-                primaryStage!!.close()
-            } else {
-                Alert(Alert.AlertType.ERROR).apply {
-                    contentText = "数据库连接异常!"
-                    show()
-                    return@EventHandler
+                Runtime.getRuntime().addShutdownHook(Thread {
+                    dbController.close()
+                })
+                if (dbController.ping()) {
+                    GenerateCode().start(Stage()
+                        .apply {
+                            properties["dbController"] = dbController
+                        }
+                    )
+                    primaryStage!!.close()
+                } else {
+                    Alert(Alert.AlertType.ERROR).apply {
+                        contentText = "数据库连接异常!"
+                        show()
+                    }
                 }
             }
+            return@EventHandler
         } catch (e: Exception) {
             Alert(Alert.AlertType.ERROR).apply {
                 contentText = "${e.javaClass.name}: ${e.message}"

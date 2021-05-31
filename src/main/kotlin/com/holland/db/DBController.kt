@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.holland.db.service.*
 import com.holland.util.FileUtil
+import com.holland.util.TimeUtil
 import java.io.File
 import java.sql.Connection
 import java.sql.DriverManager
@@ -31,6 +32,11 @@ class DBController(val dataSource: String, host: String, port: String, user: Str
                         user,
                         pwd
                     )
+            }
+            "POSTGRE" -> {
+                Class.forName("org.postgresql.Driver")
+                classPrefix = "Postgre"
+                connection = DriverManager.getConnection("jdbc:postgresql://${host}:${port}/postgres", user, pwd)
             }
             else -> {
                 throw RuntimeException("not support [$dataSource]")
@@ -77,48 +83,54 @@ class DBController(val dataSource: String, host: String, port: String, user: Str
     }
 
     fun fetchTables(): List<TableTemplate> {
-        return with(classPrefix) {
-            Class.forName("com.holland.db.service.impl.${this.toLowerCase()}.${this}FetchTablesImpl")
-                .getDeclaredConstructor(this@DBController::class.java)
-                .newInstance(this@DBController)
-                .let {
-                    it as FetchTables
-                    it.execute()
-                }
+        return TimeUtil.printMethodTime("fetchColumns") {
+            return@printMethodTime with(classPrefix) {
+                Class.forName("com.holland.db.service.impl.${this.toLowerCase()}.${this}FetchTablesImpl")
+                    .getDeclaredConstructor(this@DBController::class.java)
+                    .newInstance(this@DBController)
+                    .let {
+                        it as FetchTables
+                        it.execute()
+                    }
+            }
         }
     }
 
     fun fetchDbs(): List<String> {
-        val result = mutableListOf<String>()
-        val statement =
-            connection.prepareStatement("SELECT SCHEMA_NAME AS `Database` FROM INFORMATION_SCHEMA.SCHEMATA;")
-        statement.execute()
-        val resultSet = statement.resultSet
-        while (resultSet.next()) {
-            result.add(resultSet.getString(1))
-        }
-
-        try {
-            statement.resultSet.close()
-        } finally {
-            try {
-                statement.close()
-            } finally {
+        return TimeUtil.printMethodTime("fetchColumns") {
+            val result = mutableListOf<String>()
+            val statement =
+                connection.prepareStatement("SELECT SCHEMA_NAME AS `Database` FROM INFORMATION_SCHEMA.SCHEMATA;")
+            statement.execute()
+            val resultSet = statement.resultSet
+            while (resultSet.next()) {
+                result.add(resultSet.getString(1))
             }
-        }
 
-        return result
+            try {
+                statement.resultSet.close()
+            } finally {
+                try {
+                    statement.close()
+                } finally {
+                }
+            }
+
+            return@printMethodTime result
+        }
     }
 
     fun fetchColumns(tableName: String): List<ColumnTemplate> {
-        return with(classPrefix) {
-            Class.forName("com.holland.db.service.impl.${this.toLowerCase()}.${this}FetchColumnsImpl")
-                .getDeclaredConstructor(this@DBController::class.java)
-                .newInstance(this@DBController)
-                .let {
-                    it as FetchColumns
-                    it.execute(tableName)
-                }
+        return TimeUtil.printMethodTime("fetchColumns") {
+            return@printMethodTime with(classPrefix) {
+                Class.forName("com.holland.db.service.impl.${this.toLowerCase()}.${this}FetchColumnsImpl")
+                    .getDeclaredConstructor(this@DBController::class.java)
+                    .newInstance(this@DBController)
+                    .let {
+                        it as FetchColumns
+                        it.execute(tableName)
+                    }
+            }
         }
     }
 
@@ -134,7 +146,10 @@ class DBController(val dataSource: String, host: String, port: String, user: Str
         return if (connection.isClosed) {
             false
         } else {
-            val statement = connection.prepareStatement("select 1 from dual")
+            val statement = when (dataSource) {
+                "POSTGRE" -> connection.prepareStatement("select 1");
+                else -> connection.prepareStatement("select 1 from dual");
+            }
             statement.execute()
             statement.resultSet.let {
                 it.next()
@@ -146,8 +161,8 @@ class DBController(val dataSource: String, host: String, port: String, user: Str
     fun generatePojo(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>) =
         Generator.generatePojo(path, `package`, table, columns)
 
-    fun generateDao(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>) =
-        Generator.generateDao(path, `package`, table, columns)
+    fun generateMapper(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>) =
+        Generator.generateMapper(path, `package`, table, columns)
 
     fun generateService(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>) =
         Generator.generateService(path, `package`, table, columns)
@@ -157,7 +172,7 @@ class DBController(val dataSource: String, host: String, port: String, user: Str
 
     fun generateBe(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>) {
         generatePojo(path, `package`, table, columns)
-        generateDao(path, `package`, table, columns)
+        generateMapper(path, `package`, table, columns)
         generateService(path, `package`, table, columns)
         generateControl(path, `package`, table, columns)
     }

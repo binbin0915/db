@@ -7,6 +7,11 @@ interface FetchTables {
 class TableTemplate {
 
     var name: String
+
+    /**
+     * TABLE
+     * VIEW
+     */
     var type: String?
     var comment: String?
 

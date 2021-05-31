@@ -58,50 +58,50 @@ class GenerateTable : Application() {
         list_column.isEditable = true
 
         // TODO: 2021/2/5 必须要回车才能有值
-        with(TableColumn<ColumnTemplate, Int>("序号"), {
+        with(TableColumn<ColumnTemplate, Int>("序号")) {
             cellValueFactory = PropertyValueFactory("index")
             list_column.columns.add(this)
-        })
-        with(TableColumn<ColumnTemplate, String>("字段名"), {
+        }
+        with(TableColumn<ColumnTemplate, String>("字段名")) {
             cellValueFactory = PropertyValueFactory("columnName")
             cellFactory = TextFieldTableCell.forTableColumn()
             onEditCommit =
                 EventHandler { t -> t.tableView.items[t.tablePosition.row].columnName = t.newValue }
             list_column.columns.add(this)
-        })
-        with(TableColumn<ColumnTemplate, ChoiceBox<String>>("字段类型"), {
+        }
+        with(TableColumn<ColumnTemplate, ChoiceBox<String>>("字段类型")) {
             cellValueFactory = PropertyValueFactory("dbDataType")
             list_column.columns.add(this)
-        })
-        with(TableColumn<ColumnTemplate, Long>("字段长度"), {
+        }
+        with(TableColumn<ColumnTemplate, Long>("字段长度")) {
             cellValueFactory = PropertyValueFactory("charLength")
             cellFactory = TextFieldTableCell.forTableColumn(LongStringConverter())
             onEditCommit =
                 EventHandler { t -> t.tableView.items[t.tablePosition.row].charLength = t.newValue }
             list_column.columns.add(this)
-        })
-        with(TableColumn<ColumnTemplate, CheckBox>("是否可空"), {
+        }
+        with(TableColumn<ColumnTemplate, CheckBox>("是否可空")) {
             cellValueFactory = PropertyValueFactory("nullable")
             list_column.columns.add(this)
-        })
-        with(TableColumn<ColumnTemplate, CheckBox>("是否主键"), {
+        }
+        with(TableColumn<ColumnTemplate, CheckBox>("是否主键")) {
             cellValueFactory = PropertyValueFactory("pk")
             list_column.columns.add(this)
-        })
-        with(TableColumn<ColumnTemplate, String>("默认值"), {
+        }
+        with(TableColumn<ColumnTemplate, String>("默认值")) {
             cellValueFactory = PropertyValueFactory("dataDefault")
             cellFactory = TextFieldTableCell.forTableColumn()
             onEditCommit =
                 EventHandler { t -> t.tableView.items[t.tablePosition.row].dataDefault = t.newValue }
             list_column.columns.add(this)
-        })
-        with(TableColumn<ColumnTemplate, String>("备注"), {
+        }
+        with(TableColumn<ColumnTemplate, String>("备注")) {
             cellValueFactory = PropertyValueFactory("comments")
             cellFactory = TextFieldTableCell.forTableColumn()
             onEditCommit =
                 EventHandler { t -> t.tableView.items[t.tablePosition.row].comments = t.newValue }
             list_column.columns.add(this)
-        })
+        }
 
         val dbTypes = when (dbController.dataSource) {
             "MYSQL" -> MysqlUtil.dbType2JavaType.keys.toTypedArray()

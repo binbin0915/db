@@ -20,7 +20,7 @@
     <Button id="btn_fe" layoutX="369.0" layoutY="27.0" mnemonicParsing="false" text="选择"/>
     <Button id="btn_be" layoutX="659.0" layoutY="27.0" mnemonicParsing="false" text="选择"/>
     <Button id="btn_gr_pojo" layoutX="218.0" layoutY="428.0" mnemonicParsing="false" text="生成pojo"/>
-    <Button id="btn_gr_dao" layoutX="285.0" layoutY="428.0" mnemonicParsing="false" text="生成dao"/>
+    <Button id="btn_gr_mapper" layoutX="285.0" layoutY="428.0" mnemonicParsing="false" text="生成mapper"/>
     <Button id="btn_gr_service" layoutX="347.0" layoutY="428.0" mnemonicParsing="false" text="生成service"/>
     <Button id="btn_gr_control" layoutX="427.0" layoutY="428.0" mnemonicParsing="false" text="生成control"/>
     <Button id="btn_gr_be" layoutX="130.0" layoutY="428.0" mnemonicParsing="false" text="生成后端项目"/>
