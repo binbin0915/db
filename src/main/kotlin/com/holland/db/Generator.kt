@@ -15,7 +15,7 @@ object Generator {
     fun generateService(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>) {
         val composePath = composePath(path, `package`)
         val composePackage = composePackage(`package`)
-        val pkColumn = columns.firstOrNull { it.pk }
+        val pkColumn = columns.firstOrNull { it.pk } ?: columns.getOrNull(0)
 
         serviceInterface(composePath, table, composePackage, pkColumn)
         serviceImplement(composePath, table, composePackage, columns, pkColumn)
@@ -46,7 +46,7 @@ object Generator {
     fun generateMapper(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>) {
         val composePath = composePath(path, `package`)
         val composePackage = composePackage(`package`)
-        val pkColumn = columns.firstOrNull { it.pk }
+        val pkColumn = columns.firstOrNull { it.pk } ?: columns.getOrNull(0)
 
         mapperXml(composePath, table, composePackage, columns, pkColumn)
         mapperInterface(composePath, table, composePackage, pkColumn)
