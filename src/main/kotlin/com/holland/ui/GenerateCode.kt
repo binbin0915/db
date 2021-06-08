@@ -1,6 +1,7 @@
 package com.holland.ui
 
 import com.holland.db.DBController
+import com.holland.db.DataSource.MYSQL
 import com.holland.db.service.ColumnTemplate
 import com.holland.db.service.TableTemplate
 import com.holland.util.UiUtil
@@ -118,7 +119,7 @@ class GenerateCode : Application() {
             return@EventHandler
         }
 
-        if ("MYSQL" == dbController.dataSource) {
+        if (MYSQL == dbController.dataSource) {
             choice_table.items.addAll(dbController.fetchDbs())
             choice_table.onAction = EventHandler { dbController.schema = choice_table.value }
         }

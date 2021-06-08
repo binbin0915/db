@@ -1,6 +1,7 @@
 package com.holland.ui
 
 import com.holland.db.DBController
+import com.holland.db.DataSource.MYSQL
 import com.holland.db.service.TableTemplate
 import com.holland.db.service.impl.mysql.MysqlUtil
 import com.holland.db.service.impl.oracle.OracleUtil
@@ -104,7 +105,7 @@ class GenerateTable : Application() {
         }
 
         val dbTypes = when (dbController.dataSource) {
-            "MYSQL" -> MysqlUtil.dbType2JavaType.keys.toTypedArray()
+            MYSQL -> MysqlUtil.dbType2JavaType.keys.toTypedArray()
             else -> OracleUtil.dbType2JavaType.keys.toTypedArray()
         }
         btn_add.onAction = EventHandler {
@@ -132,7 +133,7 @@ class GenerateTable : Application() {
                 }
                 return@EventHandler
             }
-            if ("MYSQL" == dbController.dataSource && choice_table.value.isEmpty()) {
+            if (MYSQL == dbController.dataSource && choice_table.value.isEmpty()) {
                 Alert(Alert.AlertType.INFORMATION).apply {
                     contentText = "数据库不能为空"
                     show()
@@ -146,7 +147,7 @@ class GenerateTable : Application() {
                         it.columnName,
                         it.dbDataType.value,
                         when (dbController.dataSource) {
-                            "MYSQL" -> MysqlUtil.dbType2JavaType(it.dbDataType.value)
+                            MYSQL -> MysqlUtil.dbType2JavaType(it.dbDataType.value)
                             else -> OracleUtil.dbType2JavaType(it.dbDataType.value)
                         },
                         it.charLength ?: 0,
@@ -156,7 +157,7 @@ class GenerateTable : Application() {
                         it.pk.isSelected
                     )
                 }, box_increment_id.isSelected,
-                if (dbController.dataSource == "MYSQL") choice_table.value else null
+                if (dbController.dataSource == MYSQL) choice_table.value else null
             )
             Alert(Alert.AlertType.INFORMATION).apply {
                 contentText = "表${text_table_name.text} 创建成功"
@@ -193,7 +194,7 @@ class GenerateTable : Application() {
             }
         }
 
-        if ("MYSQL" == dbController.dataSource) {
+        if (MYSQL == dbController.dataSource) {
             choice_table.items.addAll(dbController.fetchDbs())
             choice_table.onAction = EventHandler { dbController.schema = choice_table.value }
         }

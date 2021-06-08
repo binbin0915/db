@@ -2,6 +2,7 @@ package com.holland.db
 
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import com.holland.db.DataSource.*
 import com.holland.db.service.*
 import com.holland.util.FileUtil
 import com.holland.util.TimeUtil
@@ -10,22 +11,26 @@ import java.sql.Connection
 import java.sql.DriverManager
 
 @Suppress("unused", "JoinDeclarationAndAssignment", "MemberVisibilityCanBePrivate")
-class DBController(val dataSource: String, host: String, port: String, user: String, pwd: String) {
+class DBController(
+    val dataSource: DataSource,
+    private val host: String,
+    private val port: String,
+    private val user: String,
+    private val pwd: String,
+    database: String
+) {
     var schema: String? = null
 
     var connection: Connection
-    private val classPrefix: String
 
     init {
         when (dataSource) {
-            "ORACLE" -> {
+            ORACLE -> {
                 Class.forName("oracle.jdbc.driver.OracleDriver")
-                classPrefix = "Oracle"
                 connection = DriverManager.getConnection("jdbc:oracle:thin:@${host}:${port}/orcl", user, pwd)
             }
-            "MYSQL" -> {
+            MYSQL -> {
                 Class.forName("com.mysql.cj.jdbc.Driver")
-                classPrefix = "Mysql"
                 connection =
                     DriverManager.getConnection(
                         "jdbc:mysql://${host}:${port}/mysql?useUnicode=true&characterEncoding=utf8&useSSL=false&autoReconnect=true&serverTimezone=Asia/Shanghai",
@@ -33,13 +38,9 @@ class DBController(val dataSource: String, host: String, port: String, user: Str
                         pwd
                     )
             }
-            "POSTGRE" -> {
+            POSTGRE -> {
                 Class.forName("org.postgresql.Driver")
-                classPrefix = "Postgre"
-                connection = DriverManager.getConnection("jdbc:postgresql://${host}:${port}/postgres", user, pwd)
-            }
-            else -> {
-                throw RuntimeException("not support [$dataSource]")
+                connection = DriverManager.getConnection("jdbc:postgresql://${host}:${port}/${database}", user, pwd)
             }
         }
 
@@ -56,12 +57,13 @@ class DBController(val dataSource: String, host: String, port: String, user: Str
             }
         }
 
-        FileUtil.newLine2File(JsonObject().let {
-            it.addProperty("dataSource", dataSource)
+        FileUtil.append2File(JsonObject().let {
+            it.addProperty("dataSource", dataSource.name)
             it.addProperty("host", host)
             it.addProperty("port", port)
             it.addProperty("user", user)
             it.addProperty("password", pwd)
+            it.addProperty("database", database)
             val json = Gson().toJson(it)
             if (dbConf?.contains(json) == true) null else json
         }, path, fileName)
@@ -71,28 +73,24 @@ class DBController(val dataSource: String, host: String, port: String, user: Str
      * @param db:mysql 需要db
      */
     fun createTable(table: TableTemplate, columns: List<ColumnTemplate>, incrementId: Boolean, db: String?) {
-        with(classPrefix) {
-            Class.forName("com.holland.db.service.impl.${this.toLowerCase()}.${this}CreateTableImpl")
-                .getDeclaredConstructor(this@DBController::class.java)
-                .newInstance(this@DBController)
-                .let {
-                    it as CreateTable
-                    it.execute(table, columns, incrementId, db)
-                }
-        }
+        Class.forName("com.holland.db.service.impl.${dataSource.lowerCase}.${dataSource.upperCamelCase}CreateTableImpl")
+            .getDeclaredConstructor(this@DBController::class.java)
+            .newInstance(this@DBController)
+            .let {
+                it as CreateTable
+                it.execute(table, columns, incrementId, db)
+            }
     }
 
     fun fetchTables(): List<TableTemplate> {
         return TimeUtil.printMethodTime("fetchColumns") {
-            return@printMethodTime with(classPrefix) {
-                Class.forName("com.holland.db.service.impl.${this.toLowerCase()}.${this}FetchTablesImpl")
-                    .getDeclaredConstructor(this@DBController::class.java)
-                    .newInstance(this@DBController)
-                    .let {
-                        it as FetchTables
-                        it.execute()
-                    }
-            }
+            Class.forName("com.holland.db.service.impl.${dataSource.lowerCase}.${dataSource.upperCamelCase}FetchTablesImpl")
+                .getDeclaredConstructor(this@DBController::class.java)
+                .newInstance(this@DBController)
+                .let {
+                    it as FetchTables
+                    it.execute()
+                }
         }
     }
 
@@ -122,15 +120,13 @@ class DBController(val dataSource: String, host: String, port: String, user: Str
 
     fun fetchColumns(tableName: String): List<ColumnTemplate> {
         return TimeUtil.printMethodTime("fetchColumns") {
-            return@printMethodTime with(classPrefix) {
-                Class.forName("com.holland.db.service.impl.${this.toLowerCase()}.${this}FetchColumnsImpl")
-                    .getDeclaredConstructor(this@DBController::class.java)
-                    .newInstance(this@DBController)
-                    .let {
-                        it as FetchColumns
-                        it.execute(tableName)
-                    }
-            }
+            Class.forName("com.holland.db.service.impl.${dataSource.lowerCase}.${dataSource.upperCamelCase}FetchColumnsImpl")
+                .getDeclaredConstructor(this@DBController::class.java)
+                .newInstance(this@DBController)
+                .let {
+                    it as FetchColumns
+                    it.execute(tableName)
+                }
         }
     }
 
@@ -147,7 +143,7 @@ class DBController(val dataSource: String, host: String, port: String, user: Str
             false
         } else {
             val statement = when (dataSource) {
-                "POSTGRE" -> connection.prepareStatement("select 1");
+                POSTGRE -> connection.prepareStatement("select 1");
                 else -> connection.prepareStatement("select 1 from dual");
             }
             statement.execute()
