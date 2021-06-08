@@ -17,7 +17,7 @@ class DBController(
     private val port: String,
     private val user: String,
     private val pwd: String,
-    database: String
+    private val database: String
 ) {
     var schema: String? = null
 
@@ -83,7 +83,7 @@ class DBController(
     }
 
     fun fetchTables(): List<TableTemplate> {
-        return TimeUtil.printMethodTime("fetchColumns") {
+        return TimeUtil.printMethodTime("fetchTables") {
             Class.forName("com.holland.db.service.impl.${dataSource.lowerCase}.${dataSource.upperCamelCase}FetchTablesImpl")
                 .getDeclaredConstructor(this@DBController::class.java)
                 .newInstance(this@DBController)
@@ -94,27 +94,55 @@ class DBController(
         }
     }
 
+    /**
+     * MYSQL:   获取 DATABASE
+     * POSTGRE: 获取 SCHEMA
+     */
     fun fetchDbs(): List<String> {
-        return TimeUtil.printMethodTime("fetchColumns") {
-            val result = mutableListOf<String>()
-            val statement =
-                connection.prepareStatement("SELECT SCHEMA_NAME AS `Database` FROM INFORMATION_SCHEMA.SCHEMATA;")
-            statement.execute()
-            val resultSet = statement.resultSet
-            while (resultSet.next()) {
-                result.add(resultSet.getString(1))
-            }
+        return TimeUtil.printMethodTime("fetchDbs") {
+            return@printMethodTime when (dataSource) {
+                ORACLE -> arrayListOf()
+                MYSQL -> {
+                    val result = mutableListOf<String>()
+                    val statement =
+                        connection.prepareStatement("SELECT SCHEMA_NAME AS `Database` FROM INFORMATION_SCHEMA.SCHEMATA;")
+                    statement.execute()
+                    val resultSet = statement.resultSet
+                    while (resultSet.next()) {
+                        result.add(resultSet.getString(1))
+                    }
 
-            try {
-                statement.resultSet.close()
-            } finally {
-                try {
-                    statement.close()
-                } finally {
+                    try {
+                        statement.resultSet.close()
+                    } finally {
+                        try {
+                            statement.close()
+                        } finally {
+                        }
+                    }
+                    return@printMethodTime result
+                }
+                POSTGRE -> {
+                    val result = mutableListOf<String>()
+                    val statement =
+                        connection.prepareStatement("SELECT schema_name FROM information_schema.schemata where schema_name <> 'information_schema' and schema_name <> 'pg_catalog' and schema_name <> 'pg_toast';")
+                    statement.execute()
+                    val resultSet = statement.resultSet
+                    while (resultSet.next()) {
+                        result.add(resultSet.getString(1))
+                    }
+
+                    try {
+                        statement.resultSet.close()
+                    } finally {
+                        try {
+                            statement.close()
+                        } finally {
+                        }
+                    }
+                    return@printMethodTime result
                 }
             }
-
-            return@printMethodTime result
         }
     }
 

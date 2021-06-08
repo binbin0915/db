@@ -2,6 +2,22 @@ package com.holland.db.service.impl.postgre
 
 object PostgreUtil {
 
+//    fun formatDbType(type: String): String {
+//        when (type) {
+//            "integer" -> {
+//            }
+//            else -> {
+//                if (type.startsWith("character")) {
+//
+//                } else if (type.startsWith("timestamp")) {
+//
+//                } else {
+//                    "java."
+//                }
+//            }
+//        }
+//    }
+
     fun dbType2JavaType(type: String): String {
         if (type.startsWith("character")) {
             return "String"

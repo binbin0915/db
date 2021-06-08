@@ -60,7 +60,7 @@ object Generator {
     ) {
         val className = UPPER_UNDERSCORE.to(UPPER_CAMEL, table.name)
         val pk = if (null == pkColumn) "key" else UPPER_UNDERSCORE.to(LOWER_CAMEL, pkColumn.columnName)
-        val parameterType = if (pkColumn == null) "String" else getParameterType(pkColumn.javaDataType)
+        val javaType = pkColumn?.javaDataType ?: "String"
         StringBuffer()
             .apply {
                 append(
@@ -71,9 +71,9 @@ object Generator {
         
                |@Mapper
                |public interface ${className}Mapper {
-               |    $className selectByPrimaryKey($parameterType $pk);
+               |    $className selectByPrimaryKey($javaType $pk);
 
-               |    int deleteByPrimaryKey($parameterType $pk);
+               |    int deleteByPrimaryKey($javaType $pk);
                     
                |    int updateByPrimaryKeySelective(${className} record);
                     
@@ -106,7 +106,7 @@ object Generator {
             appendLine("""  <resultMap id="BaseResultMap" type="${`package`}.pojo.$className">""")
             columns.forEach {
                 appendLine(
-                    """    <id column="${it.columnName}" jdbcType="${it.dbDataType}" property="${
+                    """    <id column="${it.columnName}" property="${
                         UPPER_UNDERSCORE.to(LOWER_CAMEL, it.columnName)
                     }" />"""
                 )
@@ -122,12 +122,12 @@ object Generator {
             appendLine("""    select """)
             appendLine("""    <include refid="Base_Column_List" />""")
             appendLine("""    from ${table.name}""")
-            if (pkColumn != null) appendLine("""    where ${pkColumn.columnName} = #{${pkColumn.columnName},jdbcType=${pkColumn.dbDataType}}""")
+            if (pkColumn != null) appendLine("""    where ${pkColumn.columnName} = #{${pkColumn.columnName}}""")
             appendLine("""  </select>""")
 
             appendLine("""  <delete id="deleteByPrimaryKey" parameterType="$parameterType">""")
             appendLine("""    delete from ${table.name}""")
-            if (pkColumn != null) appendLine("""    where ${pkColumn.columnName} = #{${pkColumn.columnName},jdbcType=${pkColumn.dbDataType}}""")
+            if (pkColumn != null) appendLine("""    where ${pkColumn.columnName} = #{${pkColumn.columnName}}""")
             appendLine("""  </delete>""")
 
             appendLine("""  <update id="updateByPrimaryKeySelective" parameterType="$parameterType">""")
@@ -143,9 +143,9 @@ object Generator {
                         LOWER_CAMEL,
                         it.columnName
                     )
-                },jdbcType=${it.dbDataType}},</if>"""
+                }},</if>"""
             })
-            if (pkColumn != null) appendLine("""    where ${pkColumn.columnName} = #{${pkColumn.columnName},jdbcType=${pkColumn.dbDataType}}""")
+            if (pkColumn != null) appendLine("""    where ${pkColumn.columnName} = #{${pkColumn.columnName}}""")
             appendLine("""  </update>""")
 
             appendLine("""  <insert id="insertSelective" parameterType="${`package`}.pojo.$className">""")
@@ -171,7 +171,7 @@ object Generator {
                 ) {
                     """      <if test="${
                         UPPER_UNDERSCORE.to(LOWER_CAMEL, it.columnName)
-                    } != null">#{${UPPER_UNDERSCORE.to(LOWER_CAMEL, it.columnName)},jdbcType=${it.dbDataType}},</if>"""
+                    } != null">#{${UPPER_UNDERSCORE.to(LOWER_CAMEL, it.columnName)}},</if>"""
                 })
             appendLine("""  </insert>""")
             appendLine("""</mapper>""")
@@ -203,7 +203,7 @@ object Generator {
                |import io.swagger.annotations.ApiModelProperty;
                |
                |/**
-               | * comment: ${table.comment}
+               | * comment: ${table.comment ?: className}
                | */
                |@Data
                |@Accessors(chain = true)
@@ -214,9 +214,9 @@ object Generator {
         columns.forEach {
             pojoBuilder.append(
                 """|    /**
-                   |     * ${it.comments}
+                   |     * ${it.comments ?: it.columnName}
                    |     */
-                   |    @ApiModelProperty(value = "${it.comments}")${if (it.nullable) "" else "\n\t@NotNull"}${if ("Date" == it.javaDataType) "\n\t@DateTimeFormat(pattern = \"yyyy-MM-dd HH:mm:ss\")" else ""}${if (it.charLength > 0) "\n\t@Size(max = ${it.charLength}, message = \"${it.columnName} 长度不能大于${it.charLength}\")" else ""}
+                   |    @ApiModelProperty(value = "${it.comments ?: it.columnName}")${if (it.nullable) "" else "\n\t@NotNull"}${if ("Date" == it.javaDataType) "\n\t@DateTimeFormat(pattern = \"yyyy-MM-dd HH:mm:ss\")" else ""}${if (it.charLength > 0) "\n\t@Size(max = ${it.charLength}, message = \"${it.columnName} 长度不能大于${it.charLength}\")" else ""}
                    |    private ${it.javaDataType} ${UPPER_UNDERSCORE.to(LOWER_CAMEL, it.columnName)};
                    |
                    |""".trimMargin()

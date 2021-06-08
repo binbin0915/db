@@ -44,12 +44,8 @@ class OracleFetchColumnsImpl(private val dbController: DBController) : FetchColu
     }
 
     private fun getPk(result: List<ColumnTemplate>, dbController: DBController, tableName: String) {
-        val sql = """
- select COLUMN_NAME
-from user_cons_columns a, user_constraints b 
-where a.constraint_name = b.constraint_name 
-  and b.constraint_type = 'P' and a.table_name = ?"""
-        val statement = dbController.connection.prepareStatement(sql)
+        val statement =
+            dbController.connection.prepareStatement("select COLUMN_NAME from user_cons_columns a, user_constraints b where a.constraint_name = b.constraint_name and b.constraint_type = 'P' and a.table_name = ?")
         statement.setString(1, tableName)
         statement.execute()
         val resultSet = statement.resultSet

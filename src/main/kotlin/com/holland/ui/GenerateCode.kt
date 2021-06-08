@@ -1,7 +1,8 @@
 package com.holland.ui
 
 import com.holland.db.DBController
-import com.holland.db.DataSource.MYSQL
+import com.holland.db.DataSource
+import com.holland.db.DataSource.*
 import com.holland.db.service.ColumnTemplate
 import com.holland.db.service.TableTemplate
 import com.holland.util.UiUtil
@@ -67,7 +68,6 @@ class GenerateCode : Application() {
         btn_gr_be = pane.lookup("#btn_gr_be") as Button
         btn_gr_fe = pane.lookup("#btn_gr_fe") as Button
 
-
         with(TableColumn<ColumnTemplate, String>("字段名")) {
             cellValueFactory = PropertyValueFactory("columnName")
             list_column.columns.add(this)
@@ -121,7 +121,18 @@ class GenerateCode : Application() {
 
         if (MYSQL == dbController.dataSource) {
             choice_table.items.addAll(dbController.fetchDbs())
-            choice_table.onAction = EventHandler { dbController.schema = choice_table.value }
+            choice_table.onAction = EventHandler {
+                dbController.schema = choice_table.value
+                refresh_table.fire()
+            }
+        }
+
+        if (POSTGRE == dbController.dataSource){
+            choice_table.items.addAll(dbController.fetchDbs())
+            choice_table.onAction = EventHandler {
+                dbController.schema = choice_table.value
+                refresh_table.fire()
+            }
         }
 
         list_table.selectionModel.selectedItemProperty().addListener { _, oldValue, newValue ->

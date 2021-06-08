@@ -9,7 +9,8 @@ class PostgreFetchTablesImpl(private val dbController: DBController) : FetchTabl
     override fun execute(): List<TableTemplate> {
         val result = mutableListOf<TableTemplate>()
         val statement =
-            dbController.connection.prepareStatement("select relkind,relname as table_name,cast(obj_description(relfilenode,'pg_class') as varchar) as table_comment from pg_class c where relkind = 'r' and relname not like 'pg_%' and relname not like 'sql_%' order by relname")
+            dbController.connection.prepareStatement("select relkind,relname as table_name,cast(obj_description(relfilenode,'pg_class') as varchar) as table_comment from pg_class c where relnamespace = (SELECT oid FROM pg_catalog.pg_namespace where nspname = ?) and relkind = 'r' and relname not like 'pg_%' and relname not like 'sql_%' order by relname")
+        statement.setString(1, dbController.schema)
         statement.execute()
         statement.resultSet.apply {
             while (next()) {
