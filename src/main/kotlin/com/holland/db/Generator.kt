@@ -9,7 +9,71 @@ import java.io.File
 object Generator {
 
     fun generateControl(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>) {
+        val composePath = composePath(path, `package`)
+        val composePackage = composePackage(`package`)
+        val pkColumn = columns.firstOrNull { it.pk } ?: columns.getOrNull(0)
 
+        val className = UPPER_UNDERSCORE.to(UPPER_CAMEL, table.name)
+        val service = UPPER_CAMEL.to(LOWER_CAMEL, className) + "Service"
+        val pk = if (null == pkColumn) "key" else UPPER_UNDERSCORE.to(LOWER_CAMEL, pkColumn.columnName)
+        val javaType = pkColumn?.javaDataType ?: "String"
+
+        StringBuffer()
+            .apply {
+                append(
+                    """|package ${composePackage}.controller;
+
+               |import ${composePackage}.pojo.$className;
+               |import ${composePackage}.pojo.Response;
+               |import ${composePackage}.service.I${className}Service;
+               |import com.github.pagehelper.PageInfo;
+               |import io.swagger.annotations.Api;
+               |import org.springframework.web.bind.annotation.*;
+               |import javax.annotation.Resource;
+
+               |@Api(tags = "${table.comment ?: className}", value = "${table.comment ?: className}")
+               |@RestController
+               |@RequestMapping("${UPPER_CAMEL.to(LOWER_CAMEL, className)}")
+               |public class ${className}Controller {
+               |
+               |    @Resource
+               |    private I${className}Service $service;
+               |
+               |    @GetMapping("{$pk}")
+               |    public Response<$className> find(@PathVariable("$pk") $javaType $pk) {
+               |        return Response.<$className>success($service.getModel($pk))
+               |    }
+
+               |    @GetMapping("list")
+               |    public Response<$className> list(@RequestBody $className record, Integer page, Integer limit) {
+               |        final PageInfo<$className> list = $service.getList(record, page, limit);
+               |        return Response.<$className>success(list.getList(), list.getTotal());
+               |    }
+
+               |    @DeleteMapping("{$pk}")
+               |    public Response<$className> delete(@PathVariable("$pk") $javaType $pk) {
+               |        return Response.<$className>success($service.delModel($pk));
+               |    }
+
+               |    @PutMapping
+               |    public Response<$className> update(@RequestBody $className record) {
+               |        return Response.<$className>success($service.updateModel(record));
+               |    }
+
+               |    @PostMapping
+               |    public Response<$className> add(@RequestBody $className record) {
+               |        return Response.<$className>success($service.addModel(record));
+               |    }
+               |}""".trimMargin()
+                )
+            }
+            .let {
+                FileUtil.newFile(
+                    it.toString(),
+                    composePath,
+                    "${className}Controller.java"
+                )
+            }
     }
 
     fun generateService(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>) {
@@ -22,22 +86,113 @@ object Generator {
     }
 
     private fun serviceInterface(
-        composePath: String,
+        path: String,
         table: TableTemplate,
-        composePackage: String,
+        `package`: String,
         pkColumn: ColumnTemplate?
     ) {
+        val className = UPPER_UNDERSCORE.to(UPPER_CAMEL, table.name)
+        val pk = if (null == pkColumn) "key" else UPPER_UNDERSCORE.to(LOWER_CAMEL, pkColumn.columnName)
+        val javaType = pkColumn?.javaDataType ?: "String"
+        StringBuffer()
+            .apply {
+                append(
+                    """|package ${`package`}.service;
 
+               |import ${`package`}.pojo.$className;
+               |import com.github.pagehelper.PageInfo;
+
+               |public interface I${className}Service {
+               |    $className getModel($javaType $pk);
+
+               |    PageInfo<$className> getList($className record, Integer page, Integer limit);
+
+               |    int delModel($javaType $pk);
+                    
+               |    int updateModel($className record);
+                    
+               |    int addModel($className record);
+               |}""".trimMargin()
+                )
+            }
+            .let {
+                FileUtil.newFile(
+                    it.toString(),
+                    path,
+                    "I${className}Service.java"
+                )
+            }
     }
 
     private fun serviceImplement(
-        composePath: String,
+        path: String,
         table: TableTemplate,
-        composePackage: String,
+        `package`: String,
         columns: List<ColumnTemplate>,
         pkColumn: ColumnTemplate?
     ) {
+        val className = UPPER_UNDERSCORE.to(UPPER_CAMEL, table.name)
+        val mapper = UPPER_CAMEL.to(LOWER_CAMEL, className) + "Mapper"
+        val pk = if (null == pkColumn) "key" else UPPER_UNDERSCORE.to(LOWER_CAMEL, pkColumn.columnName)
+        val javaType = pkColumn?.javaDataType ?: "String"
+        StringBuffer()
+            .apply {
+                append(
+                    """|package ${`package`}.service.impl;
 
+               |import ${`package`}.pojo.$className;
+               |import ${`package`}.service.I${className}Service;
+               |import com.github.pagehelper.PageHelper;
+               |import com.github.pagehelper.PageInfo;
+               |import javax.annotation.Resource;
+               |import org.springframework.stereotype.Service;
+
+               |import java.util.List;
+
+               |@Service
+               |public class ${className}ServiceImpl implements I${className}Service {
+
+               |    @Resource
+               |    private ${className}Mapper $mapper;
+
+               |    @Override
+               |    public $className getModel($javaType $pk) {
+               |        return $mapper.selectByPrimaryKey($pk);
+               |    }
+
+               |    @Override
+               |    public PageInfo<$className> getList($className record, Integer page, Integer limit) {
+               |        if (page == null || page <= 0) page = 1;
+               |        if (limit == null || limit <= 0) limit = 10;
+               |        PageHelper.startPage(page, limit);
+               |        final List<$className> list = $mapper.listByCondition(record, page, limit);
+               |        return new PageInfo<>(list);
+               |    }
+
+               |    @Override
+               |    public int delModel($javaType $pk) {
+               |        return $mapper.deleteByPrimaryKey($pk);
+               |    }
+                    
+               |    @Override
+               |    public int updateModel($className record) {
+               |        return $mapper.updateByPrimaryKeySelective(record);
+               |    }
+                    
+               |    @Override
+               |    public int addModel($className record) {
+               |        return $mapper.insertSelective(record);
+               |    }
+               |}""".trimMargin()
+                )
+            }
+            .let {
+                FileUtil.newFile(
+                    it.toString(),
+                    path,
+                    "${className}ServiceImpl.java"
+                )
+            }
     }
 
     /**
@@ -69,9 +224,13 @@ object Generator {
                |import ${`package`}.pojo.$className;
                |import org.apache.ibatis.annotations.Mapper;
         
+               |import java.util.List;
+
                |@Mapper
                |public interface ${className}Mapper {
                |    $className selectByPrimaryKey($javaType $pk);
+
+               |    List<$className> listByCondition($className record, int page, int limit);
 
                |    int deleteByPrimaryKey($javaType $pk);
                     
@@ -123,6 +282,21 @@ object Generator {
             appendLine("""    <include refid="Base_Column_List" />""")
             appendLine("""    from ${table.name}""")
             if (pkColumn != null) appendLine("""    where ${pkColumn.columnName} = #{${pkColumn.columnName}}""")
+            appendLine("""  </select>""")
+
+            appendLine("""  <select id="listByCondition" resultMap="BaseResultMap">""")
+            appendLine("""    select """)
+            appendLine("""    <include refid="Base_Column_List" />""")
+            appendLine("""    from ${table.name}""")
+            appendLine(
+                columns.joinToString(
+                    "\n",
+                    "    <where>\n",
+                    "\n   </where>"
+                ) {
+                    val lowerCamel = UPPER_UNDERSCORE.to(LOWER_CAMEL, it.columnName)
+                    "       <if test=\"$lowerCamel != null and $lowerCamel !=''\">AND ${it.columnName} = #{$lowerCamel}</if>"
+                })
             appendLine("""  </select>""")
 
             appendLine("""  <delete id="deleteByPrimaryKey" parameterType="$parameterType">""")

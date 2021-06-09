@@ -6,6 +6,9 @@ interface FetchColumns {
 
 @Suppress("MemberVisibilityCanBePrivate")
 class ColumnTemplate(
+    /**
+     * UPPER_UNDERSCORE
+     */
     var columnName: String,
     val dbDataType: String,
     val javaDataType: String,

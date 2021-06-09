@@ -1,8 +1,8 @@
 package com.holland.ui
 
 import com.holland.db.DBController
-import com.holland.db.DataSource
-import com.holland.db.DataSource.*
+import com.holland.db.DataSource.MYSQL
+import com.holland.db.DataSource.POSTGRE
 import com.holland.db.service.ColumnTemplate
 import com.holland.db.service.TableTemplate
 import com.holland.util.UiUtil
@@ -101,6 +101,8 @@ class GenerateCode : Application() {
             EventHandler { dbController.generateService(text_be.text, text_package.text, table, columns) }
         btn_gr_control.onAction =
             EventHandler { dbController.generateControl(text_be.text, text_package.text, table, columns) }
+        btn_gr_be.onAction =
+            EventHandler { dbController.generateBe(text_be.text, text_package.text, table, columns) }
 
         btn_fe.onAction = EventHandler { text_fe.text = UiUtil.openFolderChooser(primaryStage)?.path }
         btn_be.onAction = EventHandler { text_be.text = UiUtil.openFolderChooser(primaryStage)?.path }
@@ -127,7 +129,7 @@ class GenerateCode : Application() {
             }
         }
 
-        if (POSTGRE == dbController.dataSource){
+        if (POSTGRE == dbController.dataSource) {
             choice_table.items.addAll(dbController.fetchDbs())
             choice_table.onAction = EventHandler {
                 dbController.schema = choice_table.value
