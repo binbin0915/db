@@ -4,4 +4,5 @@
 /build/classes/java/main/
 /.idea
 /temp
-/conf
+/conf/db_connect.conf
+/conf/recent_file.conf
