@@ -16,7 +16,7 @@ object UiUtil {
         val folderChooser = DirectoryChooser()
         folderChooser.title = "选择文件夹"
 
-        val readFile = FileUtil.readFile("conf", "recent_file.conf")
+        val readFile = FileUtil.readFile4Line("conf", "recent_file.conf")
         val selectedFolder = if (readFile.isEmpty()) {
             folderChooser.showDialog(primaryStage)
         } else {

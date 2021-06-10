@@ -182,22 +182,45 @@ class DBController(
         }
     }
 
+//    fun generatePojo(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>) =
+//        Generator(path, `package`, table, columns).generatePojo()
+//
+//    fun generateMapper(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>) =
+//        Generator(path, `package`, table, columns).generateMapper()
+//
+//    fun generateService(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>) =
+//        Generator(path, `package`, table, columns).generateService()
+//
+//    fun generateControl(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>) =
+//        Generator(path, `package`, table, columns).generateControl()
+//
+//    fun generateBe(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>) {
+//        Generator(path, `package`, table, columns).let {
+//            it.generatePojo()
+//            it.generateMapper()
+//            it.generateService()
+//            it.generateControl()
+//        }
+//    }
+
     fun generatePojo(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>) =
-        Generator.generatePojo(path, `package`, table, columns)
+        GeneratorJS(path, `package`, table, columns).generatePojo()
 
     fun generateMapper(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>) =
-        Generator.generateMapper(path, `package`, table, columns)
+        GeneratorJS(path, `package`, table, columns).generateMapper()
 
     fun generateService(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>) =
-        Generator.generateService(path, `package`, table, columns)
+        GeneratorJS(path, `package`, table, columns).generateService()
 
     fun generateControl(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>) =
-        Generator.generateControl(path, `package`, table, columns)
+        GeneratorJS(path, `package`, table, columns).generateControl()
 
     fun generateBe(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>) {
-        generatePojo(path, `package`, table, columns)
-        generateMapper(path, `package`, table, columns)
-        generateService(path, `package`, table, columns)
-        generateControl(path, `package`, table, columns)
+        GeneratorJS(path, `package`, table, columns).let {
+            it.generatePojo()
+            it.generateMapper()
+            it.generateService()
+            it.generateControl()
+        }
     }
 }

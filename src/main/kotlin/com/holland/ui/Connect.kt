@@ -34,7 +34,7 @@ class Connect : Application() {
             val choice_database = ChoiceBox(ImmutableObservableList(*DataSource.values().copyOf()))
             choice_database.value = DataSource.ORACLE
             val choice_history =
-                ChoiceBox(ImmutableObservableList("历史记录", *FileUtil.readFile("conf", "db_connect.conf")))
+                ChoiceBox(ImmutableObservableList("历史记录", *FileUtil.readFile4Line("conf", "db_connect.conf")))
             add(choice_database, 0, row)
             add(choice_history, 1, row++)
 

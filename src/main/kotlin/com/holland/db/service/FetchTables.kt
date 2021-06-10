@@ -6,6 +6,9 @@ interface FetchTables {
 
 class TableTemplate {
 
+    /**
+     * UPPER_UNDERSCORE
+     */
     var name: String
 
     /**

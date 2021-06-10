@@ -41,7 +41,12 @@ object FileUtil {
         content?.let { file.writeText(it + System.getProperty("line.separator")) }
     }
 
-    fun readFile(path: String, fileName: String): Array<String> {
+    fun readFile(path: String, fileName: String): String {
+        val file = File("$path${File.separatorChar}$fileName")
+        return file.readText()
+    }
+
+    fun readFile4Line(path: String, fileName: String): Array<String> {
         val file = File("$path${File.separatorChar}$fileName")
         return if (file.exists()) {
             file.readLines().toTypedArray()

@@ -6,112 +6,84 @@ import com.holland.db.service.TableTemplate
 import com.holland.util.FileUtil
 import java.io.File
 
-object Generator {
+@Suppress("PrivatePropertyName")
+class Generator(
+    private var path: String,
+    private var `package`: String,
+    private val table: TableTemplate,
+    private val columns: List<ColumnTemplate>
+) {
+    private val tableName_UPPER_UNDERSCORE: String
+    private val tableName_UPPER_CAMEL: String
+    private val tableName_LOWER_CAMEL: String
 
-    fun generateControl(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>) {
-        val composePath = composePath(path, `package`)
-        val composePackage = composePackage(`package`)
+    private val pk_name_LOWER_CAMELE: String
+    private val pk_name_UPPER_UNDERSCORE: String
+    private val pk_javaType: String
+    private val pk_comment: String
+
+    init {
+        path = composePath(path, `package`)
+        `package` = composePackage(`package`)
         val pkColumn = columns.firstOrNull { it.pk } ?: columns.getOrNull(0)
 
-        val className = UPPER_UNDERSCORE.to(UPPER_CAMEL, table.name)
-        val service = UPPER_CAMEL.to(LOWER_CAMEL, className) + "Service"
-        val pk = if (null == pkColumn) "key" else UPPER_UNDERSCORE.to(LOWER_CAMEL, pkColumn.columnName)
-        val javaType = pkColumn?.javaDataType ?: "String"
+        tableName_UPPER_UNDERSCORE = table.name
+        tableName_UPPER_CAMEL = UPPER_UNDERSCORE.to(UPPER_CAMEL, table.name)
+        tableName_LOWER_CAMEL = UPPER_CAMEL.to(LOWER_CAMEL, tableName_UPPER_CAMEL)
 
+        pk_name_LOWER_CAMELE = if (null == pkColumn) "key" else UPPER_UNDERSCORE.to(LOWER_CAMEL, pkColumn.columnName)
+        pk_name_UPPER_UNDERSCORE = pkColumn?.columnName ?: "KEY"
+        pk_javaType = pkColumn?.javaDataType ?: "String"
+        pk_comment = pkColumn?.comments ?: "null"
+    }
+
+    fun generateControl() {
         StringBuffer()
             .apply {
                 append(
-                    """|package ${composePackage}.controller;
+                    """|package ${`package`}.controller;
 
-               |import ${composePackage}.pojo.$className;
-               |import ${composePackage}.pojo.Response;
-               |import ${composePackage}.service.I${className}Service;
+               |import ${`package`}.pojo.$tableName_UPPER_CAMEL;
+               |import ${`package`}.pojo.Response;
+               |import ${`package`}.service.I${tableName_UPPER_CAMEL}Service;
                |import com.github.pagehelper.PageInfo;
                |import io.swagger.annotations.Api;
                |import org.springframework.web.bind.annotation.*;
                |import javax.annotation.Resource;
 
-               |@Api(tags = "${table.comment ?: className}", value = "${table.comment ?: className}")
+               |@Api(tags = "${table.comment ?: tableName_UPPER_CAMEL}", value = "${table.comment ?: tableName_UPPER_CAMEL}")
                |@RestController
-               |@RequestMapping("${UPPER_CAMEL.to(LOWER_CAMEL, className)}")
-               |public class ${className}Controller {
+               |@RequestMapping("${UPPER_CAMEL.to(LOWER_CAMEL, tableName_UPPER_CAMEL)}")
+               |public class ${tableName_UPPER_CAMEL}Controller {
                |
                |    @Resource
-               |    private I${className}Service $service;
+               |    private I${tableName_UPPER_CAMEL}Service ${tableName_LOWER_CAMEL + "Service"};
                |
-               |    @GetMapping("{$pk}")
-               |    public Response<$className> find(@PathVariable("$pk") $javaType $pk) {
-               |        return Response.<$className>success($service.getModel($pk))
+               |    @GetMapping("{$pk_name_LOWER_CAMELE}")
+               |    public Response<$tableName_UPPER_CAMEL> find(@PathVariable("$pk_name_LOWER_CAMELE") $pk_javaType $pk_name_LOWER_CAMELE) {
+               |        return Response.<$tableName_UPPER_CAMEL>success(${tableName_LOWER_CAMEL + "Service"}.getModel($pk_name_LOWER_CAMELE))
                |    }
 
                |    @GetMapping("list")
-               |    public Response<$className> list(@RequestBody $className record, Integer page, Integer limit) {
-               |        final PageInfo<$className> list = $service.getList(record, page, limit);
-               |        return Response.<$className>success(list.getList(), list.getTotal());
+               |    public Response<$tableName_UPPER_CAMEL> list(@RequestBody $tableName_UPPER_CAMEL record, Integer page, Integer limit) {
+               |        final PageInfo<$tableName_UPPER_CAMEL> list = ${tableName_LOWER_CAMEL + "Service"}.getList(record, page, limit);
+               |        return Response.<$tableName_UPPER_CAMEL>success(list.getList(), list.getTotal());
                |    }
 
-               |    @DeleteMapping("{$pk}")
-               |    public Response<$className> delete(@PathVariable("$pk") $javaType $pk) {
-               |        return Response.<$className>success($service.delModel($pk));
+               |    @DeleteMapping("{$pk_name_LOWER_CAMELE}")
+               |    public Response<$tableName_UPPER_CAMEL> delete(@PathVariable("$pk_name_LOWER_CAMELE") $pk_javaType $pk_name_LOWER_CAMELE) {
+               |        return Response.<$tableName_UPPER_CAMEL>success(${tableName_LOWER_CAMEL + "Service"}.delModel($pk_name_LOWER_CAMELE));
                |    }
 
                |    @PutMapping
-               |    public Response<$className> update(@RequestBody $className record) {
-               |        return Response.<$className>success($service.updateModel(record));
+               |    public Response<$tableName_UPPER_CAMEL> update(@RequestBody $tableName_UPPER_CAMEL record) {
+               |        return Response.<$tableName_UPPER_CAMEL>success(${tableName_LOWER_CAMEL + "Service"}.updateModel(record));
                |    }
 
                |    @PostMapping
-               |    public Response<$className> add(@RequestBody $className record) {
-               |        return Response.<$className>success($service.addModel(record));
+               |    public Response<$tableName_UPPER_CAMEL> add(@RequestBody $tableName_UPPER_CAMEL record) {
+               |        return Response.<$tableName_UPPER_CAMEL>success(${tableName_LOWER_CAMEL + "Service"}.addModel(record));
                |    }
-               |}""".trimMargin()
-                )
-            }
-            .let {
-                FileUtil.newFile(
-                    it.toString(),
-                    composePath,
-                    "${className}Controller.java"
-                )
-            }
-    }
-
-    fun generateService(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>) {
-        val composePath = composePath(path, `package`)
-        val composePackage = composePackage(`package`)
-        val pkColumn = columns.firstOrNull { it.pk } ?: columns.getOrNull(0)
-
-        serviceInterface(composePath, table, composePackage, pkColumn)
-        serviceImplement(composePath, table, composePackage, columns, pkColumn)
-    }
-
-    private fun serviceInterface(
-        path: String,
-        table: TableTemplate,
-        `package`: String,
-        pkColumn: ColumnTemplate?
-    ) {
-        val className = UPPER_UNDERSCORE.to(UPPER_CAMEL, table.name)
-        val pk = if (null == pkColumn) "key" else UPPER_UNDERSCORE.to(LOWER_CAMEL, pkColumn.columnName)
-        val javaType = pkColumn?.javaDataType ?: "String"
-        StringBuffer()
-            .apply {
-                append(
-                    """|package ${`package`}.service;
-
-               |import ${`package`}.pojo.$className;
-               |import com.github.pagehelper.PageInfo;
-
-               |public interface I${className}Service {
-               |    $className getModel($javaType $pk);
-
-               |    PageInfo<$className> getList($className record, Integer page, Integer limit);
-
-               |    int delModel($javaType $pk);
-                    
-               |    int updateModel($className record);
-                    
-               |    int addModel($className record);
                |}""".trimMargin()
                 )
             }
@@ -119,29 +91,55 @@ object Generator {
                 FileUtil.newFile(
                     it.toString(),
                     path,
-                    "I${className}Service.java"
+                    "${tableName_UPPER_CAMEL}Controller.java"
                 )
             }
     }
 
-    private fun serviceImplement(
-        path: String,
-        table: TableTemplate,
-        `package`: String,
-        columns: List<ColumnTemplate>,
-        pkColumn: ColumnTemplate?
-    ) {
-        val className = UPPER_UNDERSCORE.to(UPPER_CAMEL, table.name)
-        val mapper = UPPER_CAMEL.to(LOWER_CAMEL, className) + "Mapper"
-        val pk = if (null == pkColumn) "key" else UPPER_UNDERSCORE.to(LOWER_CAMEL, pkColumn.columnName)
-        val javaType = pkColumn?.javaDataType ?: "String"
+    fun generateService() {
+        serviceInterface()
+        serviceImplement()
+    }
+
+    private fun serviceInterface() {
+        StringBuffer()
+            .apply {
+                append(
+                    """|package ${`package`}.service;
+
+               |import ${`package`}.pojo.$tableName_UPPER_CAMEL;
+               |import com.github.pagehelper.PageInfo;
+
+               |public interface I${tableName_UPPER_CAMEL}Service {
+               |    $tableName_UPPER_CAMEL getModel($pk_javaType $pk_name_LOWER_CAMELE);
+
+               |    PageInfo<$tableName_UPPER_CAMEL> getList($tableName_UPPER_CAMEL record, Integer page, Integer limit);
+
+               |    int delModel($pk_javaType $pk_name_LOWER_CAMELE);
+                    
+               |    int updateModel($tableName_UPPER_CAMEL record);
+                    
+               |    int addModel($tableName_UPPER_CAMEL record);
+               |}""".trimMargin()
+                )
+            }
+            .let {
+                FileUtil.newFile(
+                    it.toString(),
+                    path,
+                    "I${tableName_UPPER_CAMEL}Service.java"
+                )
+            }
+    }
+
+    private fun serviceImplement() {
         StringBuffer()
             .apply {
                 append(
                     """|package ${`package`}.service.impl;
 
-               |import ${`package`}.pojo.$className;
-               |import ${`package`}.service.I${className}Service;
+               |import ${`package`}.pojo.$tableName_UPPER_CAMEL;
+               |import ${`package`}.service.I${tableName_UPPER_CAMEL}Service;
                |import com.github.pagehelper.PageHelper;
                |import com.github.pagehelper.PageInfo;
                |import javax.annotation.Resource;
@@ -150,38 +148,38 @@ object Generator {
                |import java.util.List;
 
                |@Service
-               |public class ${className}ServiceImpl implements I${className}Service {
+               |public class ${tableName_UPPER_CAMEL}ServiceImpl implements I${tableName_UPPER_CAMEL}Service {
 
                |    @Resource
-               |    private ${className}Mapper $mapper;
+               |    private ${tableName_UPPER_CAMEL}Mapper ${tableName_LOWER_CAMEL + "Mapper"};
 
                |    @Override
-               |    public $className getModel($javaType $pk) {
-               |        return $mapper.selectByPrimaryKey($pk);
+               |    public $tableName_UPPER_CAMEL getModel($pk_javaType $pk_name_LOWER_CAMELE) {
+               |        return ${tableName_LOWER_CAMEL + "Mapper"}.selectByPrimaryKey($pk_name_LOWER_CAMELE);
                |    }
 
                |    @Override
-               |    public PageInfo<$className> getList($className record, Integer page, Integer limit) {
+               |    public PageInfo<$tableName_UPPER_CAMEL> getList($tableName_UPPER_CAMEL record, Integer page, Integer limit) {
                |        if (page == null || page <= 0) page = 1;
                |        if (limit == null || limit <= 0) limit = 10;
                |        PageHelper.startPage(page, limit);
-               |        final List<$className> list = $mapper.listByCondition(record, page, limit);
+               |        final List<$tableName_UPPER_CAMEL> list = ${tableName_LOWER_CAMEL + "Mapper"}.listByCondition(record, page, limit);
                |        return new PageInfo<>(list);
                |    }
 
                |    @Override
-               |    public int delModel($javaType $pk) {
-               |        return $mapper.deleteByPrimaryKey($pk);
+               |    public int delModel($pk_javaType $pk_name_LOWER_CAMELE) {
+               |        return ${tableName_LOWER_CAMEL + "Mapper"}.deleteByPrimaryKey($pk_name_LOWER_CAMELE);
                |    }
                     
                |    @Override
-               |    public int updateModel($className record) {
-               |        return $mapper.updateByPrimaryKeySelective(record);
+               |    public int updateModel($tableName_UPPER_CAMEL record) {
+               |        return ${tableName_LOWER_CAMEL + "Mapper"}.updateByPrimaryKeySelective(record);
                |    }
                     
                |    @Override
-               |    public int addModel($className record) {
-               |        return $mapper.insertSelective(record);
+               |    public int addModel($tableName_UPPER_CAMEL record) {
+               |        return ${tableName_LOWER_CAMEL + "Mapper"}.insertSelective(record);
                |    }
                |}""".trimMargin()
                 )
@@ -190,53 +188,38 @@ object Generator {
                 FileUtil.newFile(
                     it.toString(),
                     path,
-                    "${className}ServiceImpl.java"
+                    "${tableName_UPPER_CAMEL}ServiceImpl.java"
                 )
             }
     }
 
-    /**
-     * 多个pk的情况默认只做操第一个
-     */
-    fun generateMapper(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>) {
-        val composePath = composePath(path, `package`)
-        val composePackage = composePackage(`package`)
-        val pkColumn = columns.firstOrNull { it.pk } ?: columns.getOrNull(0)
-
-        mapperXml(composePath, table, composePackage, columns, pkColumn)
-        mapperInterface(composePath, table, composePackage, pkColumn)
+    fun generateMapper() {
+        mapperXml()
+        mapperInterface()
     }
 
-    private fun mapperInterface(
-        path: String,
-        table: TableTemplate,
-        `package`: String,
-        pkColumn: ColumnTemplate?,
-    ) {
-        val className = UPPER_UNDERSCORE.to(UPPER_CAMEL, table.name)
-        val pk = if (null == pkColumn) "key" else UPPER_UNDERSCORE.to(LOWER_CAMEL, pkColumn.columnName)
-        val javaType = pkColumn?.javaDataType ?: "String"
+    private fun mapperInterface() {
         StringBuffer()
             .apply {
                 append(
                     """|package ${`package`}.mapper;
 
-               |import ${`package`}.pojo.$className;
+               |import ${`package`}.pojo.$tableName_UPPER_CAMEL;
                |import org.apache.ibatis.annotations.Mapper;
         
                |import java.util.List;
 
                |@Mapper
-               |public interface ${className}Mapper {
-               |    $className selectByPrimaryKey($javaType $pk);
+               |public interface ${tableName_UPPER_CAMEL}Mapper {
+               |    $tableName_UPPER_CAMEL selectByPrimaryKey($pk_javaType $pk_name_LOWER_CAMELE);
 
-               |    List<$className> listByCondition($className record, int page, int limit);
+               |    List<$tableName_UPPER_CAMEL> listByCondition($tableName_UPPER_CAMEL record, int page, int limit);
 
-               |    int deleteByPrimaryKey($javaType $pk);
+               |    int deleteByPrimaryKey($pk_javaType $pk_name_LOWER_CAMELE);
                     
-               |    int updateByPrimaryKeySelective(${className} record);
+               |    int updateByPrimaryKeySelective(${tableName_UPPER_CAMEL} record);
                     
-               |    int insertSelective($className record);
+               |    int insertSelective($tableName_UPPER_CAMEL record);
                |}""".trimMargin()
                 )
             }
@@ -244,25 +227,18 @@ object Generator {
                 FileUtil.newFile(
                     it.toString(),
                     path,
-                    "${className}Mapper.java"
+                    "${tableName_UPPER_CAMEL}Mapper.java"
                 )
             }
     }
 
-    private fun mapperXml(
-        path: String,
-        table: TableTemplate,
-        `package`: String,
-        columns: List<ColumnTemplate>,
-        pkColumn: ColumnTemplate?
-    ) {
-        val className = UPPER_UNDERSCORE.to(UPPER_CAMEL, table.name)
+    private fun mapperXml() {
         StringBuilder().apply {
             appendLine("""<?xml version="1.0" encoding="UTF-8"?>""")
             appendLine("""<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">""")
-            appendLine("""<mapper namespace="${`package`}.mapper.$className">""")
+            appendLine("""<mapper namespace="${`package`}.mapper.$tableName_UPPER_CAMEL">""")
 
-            appendLine("""  <resultMap id="BaseResultMap" type="${`package`}.pojo.$className">""")
+            appendLine("""  <resultMap id="BaseResultMap" type="${`package`}.pojo.$tableName_UPPER_CAMEL">""")
             columns.forEach {
                 appendLine(
                     """    <id column="${it.columnName}" property="${
@@ -276,12 +252,11 @@ object Generator {
             appendLine("""    ${columns.joinToString(", ") { it.columnName }}""")
             appendLine("""  </sql>""")
 
-            val parameterType = if (pkColumn == null) "String" else getParameterType(pkColumn.javaDataType)
-            appendLine("""  <select id="selectByPrimaryKey" parameterType="$parameterType" resultMap="BaseResultMap">""")
+            appendLine("""  <select id="selectByPrimaryKey" parameterType="$pk_javaType" resultMap="BaseResultMap">""")
             appendLine("""    select """)
             appendLine("""    <include refid="Base_Column_List" />""")
             appendLine("""    from ${table.name}""")
-            if (pkColumn != null) appendLine("""    where ${pkColumn.columnName} = #{${pkColumn.columnName}}""")
+            appendLine("""    where $pk_name_UPPER_UNDERSCORE = #{$pk_name_LOWER_CAMELE}""")
             appendLine("""  </select>""")
 
             appendLine("""  <select id="listByCondition" resultMap="BaseResultMap">""")
@@ -299,12 +274,12 @@ object Generator {
                 })
             appendLine("""  </select>""")
 
-            appendLine("""  <delete id="deleteByPrimaryKey" parameterType="$parameterType">""")
+            appendLine("""  <delete id="deleteByPrimaryKey" parameterType="$pk_javaType">""")
             appendLine("""    delete from ${table.name}""")
-            if (pkColumn != null) appendLine("""    where ${pkColumn.columnName} = #{${pkColumn.columnName}}""")
+            appendLine("""    where $pk_name_UPPER_UNDERSCORE = #{$pk_name_LOWER_CAMELE}""")
             appendLine("""  </delete>""")
 
-            appendLine("""  <update id="updateByPrimaryKeySelective" parameterType="$parameterType">""")
+            appendLine("""  <update id="updateByPrimaryKeySelective" parameterType="$pk_javaType">""")
             appendLine("""    update ${table.name}""")
             appendLine(columns.joinToString("\n", "    <set>\n", "\n    </set>") {
                 """      <if test="${
@@ -319,10 +294,10 @@ object Generator {
                     )
                 }},</if>"""
             })
-            if (pkColumn != null) appendLine("""    where ${pkColumn.columnName} = #{${pkColumn.columnName}}""")
+            appendLine("""    where $pk_name_UPPER_UNDERSCORE = #{$pk_name_LOWER_CAMELE}""")
             appendLine("""  </update>""")
 
-            appendLine("""  <insert id="insertSelective" parameterType="${`package`}.pojo.$className">""")
+            appendLine("""  <insert id="insertSelective" parameterType="${`package`}.pojo.$tableName_UPPER_CAMEL">""")
             appendLine("""    insert into ${table.name}""")
             appendLine(
                 columns.joinToString(
@@ -353,20 +328,15 @@ object Generator {
             FileUtil.newFile(
                 this.toString(),
                 path,
-                "${className}Mapper.xml"
+                "${tableName_UPPER_CAMEL}Mapper.xml"
             )
         }
     }
 
-    fun generatePojo(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>) {
-        val composePath = composePath(path, `package`)
-        val composePackage = composePackage(`package`)
-
-        val pojoBuilder = StringBuilder()
-        val className = UPPER_UNDERSCORE.to(UPPER_CAMEL, table.name)
-
-        pojoBuilder.append(
-            """|package $composePackage.pojo;
+    fun generatePojo() {
+        StringBuilder().apply {
+            append(
+                """|package ${`package`}.pojo;
                |
                |import lombok.Data;
                |import lombok.experimental.Accessors;
@@ -377,33 +347,33 @@ object Generator {
                |import io.swagger.annotations.ApiModelProperty;
                |
                |/**
-               | * comment: ${table.comment ?: className}
+               | * comment: ${table.comment ?: tableName_UPPER_CAMEL}
                | */
                |@Data
                |@Accessors(chain = true)
-               |public class $className {
+               |public class $tableName_UPPER_CAMEL {
                |""".trimMargin()
-        )
-
-        columns.forEach {
-            pojoBuilder.append(
-                """|    /**
+            )
+            columns.forEach {
+                append(
+                    """|    /**
                    |     * ${it.comments ?: it.columnName}
                    |     */
                    |    @ApiModelProperty(value = "${it.comments ?: it.columnName}")${if (it.nullable) "" else "\n\t@NotNull"}${if ("Date" == it.javaDataType) "\n\t@DateTimeFormat(pattern = \"yyyy-MM-dd HH:mm:ss\")" else ""}${if (it.charLength > 0) "\n\t@Size(max = ${it.charLength}, message = \"${it.columnName} 长度不能大于${it.charLength}\")" else ""}
                    |    private ${it.javaDataType} ${UPPER_UNDERSCORE.to(LOWER_CAMEL, it.columnName)};
                    |
                    |""".trimMargin()
-            )
+                )
+            }
+            append("}")
         }
-
-        pojoBuilder.append("}")
-
-        FileUtil.newFile(
-            pojoBuilder.toString(),
-            composePath,
-            "$className.java"
-        )
+            .let {
+                FileUtil.newFile(
+                    it.toString(),
+                    path,
+                    "$tableName_UPPER_CAMEL.java"
+                )
+            }
     }
 
     /**
