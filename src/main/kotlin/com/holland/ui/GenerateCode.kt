@@ -127,6 +127,8 @@ class GenerateCode : Application() {
                 dbController.schema = choice_table.value
                 refresh_table.fire()
             }
+            choice_table.value = "mysql"
+            refresh_table.fire()
         }
 
         if (POSTGRE == dbController.dataSource) {
@@ -135,6 +137,8 @@ class GenerateCode : Application() {
                 dbController.schema = choice_table.value
                 refresh_table.fire()
             }
+            choice_table.value = "public"
+            refresh_table.fire()
         }
 
         list_table.selectionModel.selectedItemProperty().addListener { _, oldValue, newValue ->
