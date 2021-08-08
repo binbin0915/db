@@ -62,7 +62,7 @@ class GeneratorJS(
             }
             .let {
                 FileUtil.newFile(
-                    it.toString(),
+                    it?.toString(),
                     path,
                     "${tableName_UPPER_CAMEL}Controller.java"
                 )
@@ -216,7 +216,7 @@ class GeneratorJS(
             }
             .let {
                 FileUtil.newFile(
-                    it.toString(),
+                    it?.toString(),
                     path,
                     "$tableName_UPPER_CAMEL.java"
                 )

@@ -20,7 +20,8 @@ object UiUtil {
         val selectedFolder = if (readFile.isEmpty()) {
             folderChooser.showDialog(primaryStage)
         } else {
-            folderChooser.initialDirectory = File(readFile[0])
+            val path = File(readFile[0])
+            if (path.exists()) folderChooser.initialDirectory = path
             folderChooser.showDialog(primaryStage)
         }
 

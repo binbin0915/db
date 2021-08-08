@@ -7,9 +7,12 @@ object FileUtil {
     fun mkdir(path: String) {
         val file = File(path)
         when (file.exists()) {
-            true -> println("exists directory: $path")
+//            true -> println("exists directory: $path")
             false -> {
-                file.mkdir()
+                if (!file.mkdir()) {
+                    mkdir(path.substring(0, path.lastIndexOf(File.separatorChar)))
+                    file.mkdir()
+                }
                 println("create directory: $path")
             }
         }
@@ -19,7 +22,7 @@ object FileUtil {
         mkdir(path)
         val file = File("$path${File.separatorChar}$fileName")
         when (file.exists()) {
-            true -> println("rebuild file: ${file.path}")
+            true -> println("append file: ${file.path}")
             false -> {
                 println("create file: ${file.path}")
                 file.createNewFile()
@@ -32,7 +35,7 @@ object FileUtil {
         mkdir(path)
         val file = File("$path${File.separatorChar}$fileName")
         when (file.exists()) {
-            true -> println("rebuild file: ${file.path}")
+            true -> println("rewrite file: ${file.path}")
             false -> {
                 println("create file: ${file.path}")
                 file.createNewFile()

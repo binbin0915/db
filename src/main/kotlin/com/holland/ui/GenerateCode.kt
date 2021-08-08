@@ -1,10 +1,12 @@
 package com.holland.ui
 
+import com.google.common.base.CaseFormat
 import com.holland.db.DBController
 import com.holland.db.DataSource.MYSQL
 import com.holland.db.DataSource.POSTGRE
 import com.holland.db.service.ColumnTemplate
 import com.holland.db.service.TableTemplate
+import com.holland.util.FileUtil
 import com.holland.util.UiUtil
 import javafx.application.Application
 import javafx.event.EventHandler
@@ -14,6 +16,7 @@ import javafx.scene.Scene
 import javafx.scene.control.*
 import javafx.scene.control.cell.PropertyValueFactory
 import javafx.stage.Stage
+import java.io.File
 
 
 @Suppress("PrivatePropertyName")
@@ -36,8 +39,10 @@ class GenerateCode : Application() {
     private lateinit var btn_gr_be: Button
     private lateinit var btn_gr_fe: Button
 
+    private lateinit var btn_show_params: Button
+
     private lateinit var tables: List<TableTemplate>
-    private lateinit var table: TableTemplate
+    private var table: TableTemplate? = null
     private lateinit var columns: List<ColumnTemplate>
 
     @Suppress("UNCHECKED_CAST")
@@ -68,6 +73,8 @@ class GenerateCode : Application() {
         btn_gr_be = pane.lookup("#btn_gr_be") as Button
         btn_gr_fe = pane.lookup("#btn_gr_fe") as Button
 
+        btn_show_params = pane.lookup("#btn_show_params") as Button
+
         with(TableColumn<ColumnTemplate, String>("字段名")) {
             cellValueFactory = PropertyValueFactory("columnName")
             list_column.columns.add(this)
@@ -94,18 +101,70 @@ class GenerateCode : Application() {
         }
 
         btn_gr_pojo.onAction =
-            EventHandler { dbController.generatePojo(text_be.text, text_package.text, table, columns) }
+            EventHandler {
+                if (!isChooseTable()) return@EventHandler
+                dbController.generatePojo(text_be.text, text_package.text, table!!, columns)
+            }
         btn_gr_mapper.onAction =
-            EventHandler { dbController.generateMapper(text_be.text, text_package.text, table, columns) }
+            EventHandler {
+                if (!isChooseTable()) return@EventHandler
+                dbController.generateMapper(text_be.text, text_package.text, table!!, columns)
+            }
         btn_gr_service.onAction =
-            EventHandler { dbController.generateService(text_be.text, text_package.text, table, columns) }
+            EventHandler {
+                if (!isChooseTable()) return@EventHandler
+                dbController.generateService(text_be.text, text_package.text, table!!, columns)
+            }
         btn_gr_control.onAction =
-            EventHandler { dbController.generateControl(text_be.text, text_package.text, table, columns) }
+            EventHandler {
+                if (!isChooseTable()) return@EventHandler
+                dbController.generateControl(text_be.text, text_package.text, table!!, columns)
+            }
         btn_gr_be.onAction =
-            EventHandler { dbController.generateBe(text_be.text, text_package.text, table, columns) }
+            EventHandler {
+                if (!isChooseTable()) return@EventHandler
+                dbController.generateBe(text_be.text, text_package.text, table!!, columns)
+            }
 
         btn_fe.onAction = EventHandler { text_fe.text = UiUtil.openFolderChooser(primaryStage)?.path }
         btn_be.onAction = EventHandler { text_be.text = UiUtil.openFolderChooser(primaryStage)?.path }
+
+        btn_show_params.onAction = EventHandler {
+            FileUtil.newFile(run {
+                if (!isChooseTable()) return@EventHandler
+                """path                            ${text_be.text}
+                    |package                       ${text_package.text}
+                    |table                         $table
+                    |tableName_UPPER_UNDERSCORE    ${table!!.name}
+                    |tableName_UPPER_CAMEL         ${
+                    CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL,
+                        table!!.name)
+                }
+                    |tableName_LOWER_CAMEL         ${
+                    CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL,
+                        table!!.name)
+                }
+                """.trimMargin()
+                    .let {
+                        val pkColumn = columns.firstOrNull { it.pk } ?: columns.getOrNull(0)
+                        it + """
+                            |pk_name_LOWER_CAMELE          ${
+                            if (null == pkColumn) "key" else CaseFormat.UPPER_UNDERSCORE.to(
+                                CaseFormat.LOWER_CAMEL, pkColumn.columnName)
+                        }
+                            |pk_name_UPPER_UNDERSCORE      ${pkColumn?.columnName ?: "KEY"}
+                            |pk_javaType                   ${pkColumn?.javaDataType ?: "String"}
+                            |pk_comment                    ${pkColumn?.comments ?: "null"}
+                            |columns                       ${
+                            columns.map { it.toString() }
+                                .reduce { acc, columnTemplate -> "$acc\n                              $columnTemplate" }
+                        }
+                        """.trimMargin()
+                    }
+            }, ".${File.separatorChar}temp", "params.txt")
+            Runtime.getRuntime()
+                .exec(arrayOf("cmd", "/C", "start ${".${File.separatorChar}temp${File.separatorChar}params.txt"}"))
+        }
 
         UiUtil.initMenu(menu_bar)
 
@@ -144,10 +203,20 @@ class GenerateCode : Application() {
         list_table.selectionModel.selectedItemProperty().addListener { _, oldValue, newValue ->
             run {
                 table = tables.find { it.name == newValue ?: oldValue }!!
-                columns = dbController.fetchColumns(table.name)
+                columns = dbController.fetchColumns(table!!.name)
                 list_column.items.clear()
                 list_column.items.addAll(columns)
             }
         }
+    }
+
+    private fun isChooseTable(): Boolean {
+        return if (table == null) {
+            Alert(Alert.AlertType.ERROR).apply {
+                contentText = "未选择表"
+                show()
+            }
+            false
+        } else true
     }
 }
