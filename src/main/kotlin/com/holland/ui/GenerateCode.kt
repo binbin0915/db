@@ -148,6 +148,7 @@ class GenerateCode : Application() {
                     .let {
                         val pkColumn = columns.firstOrNull { it.pk } ?: columns.getOrNull(0)
                         it + """
+                            |
                             |pk_name_LOWER_CAMELE          ${
                             if (null == pkColumn) "key" else CaseFormat.UPPER_UNDERSCORE.to(
                                 CaseFormat.LOWER_CAMEL, pkColumn.columnName)

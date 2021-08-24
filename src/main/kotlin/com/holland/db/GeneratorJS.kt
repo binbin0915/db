@@ -23,6 +23,7 @@ class GeneratorJS(
     private val tableName_LOWER_CAMEL: String
 
     private val pk_name_LOWER_CAMELE: String
+    private val pk_name_UPPER_CAMELE: String
     private val pk_name_UPPER_UNDERSCORE: String
     private val pk_javaType: String
     private val pk_comment: String
@@ -38,6 +39,7 @@ class GeneratorJS(
         tableName_LOWER_CAMEL = UPPER_CAMEL.to(LOWER_CAMEL, tableName_UPPER_CAMEL)
 
         pk_name_LOWER_CAMELE = if (null == pkColumn) "key" else UPPER_UNDERSCORE.to(LOWER_CAMEL, pkColumn.columnName)
+        pk_name_UPPER_CAMELE = if (null == pkColumn) "key" else UPPER_UNDERSCORE.to(UPPER_CAMEL, pkColumn.columnName)
         pk_name_UPPER_UNDERSCORE = pkColumn?.columnName ?: "KEY"
         pk_javaType = pkColumn?.javaDataType ?: "String"
         pk_comment = pkColumn?.comments ?: "null"
@@ -57,6 +59,7 @@ class GeneratorJS(
                     tableName_UPPER_CAMEL,
                     tableName_LOWER_CAMEL,
                     pk_name_LOWER_CAMELE,
+                    pk_name_UPPER_CAMELE,
                     pk_name_UPPER_UNDERSCORE,
                     pk_javaType,
                     pk_comment
@@ -91,6 +94,7 @@ class GeneratorJS(
                     tableName_UPPER_CAMEL,
                     tableName_LOWER_CAMEL,
                     pk_name_LOWER_CAMELE,
+                    pk_name_UPPER_CAMELE,
                     pk_name_UPPER_UNDERSCORE,
                     pk_javaType,
                     pk_comment
@@ -120,6 +124,7 @@ class GeneratorJS(
                     tableName_UPPER_CAMEL,
                     tableName_LOWER_CAMEL,
                     pk_name_LOWER_CAMELE,
+                    pk_name_UPPER_CAMELE,
                     pk_name_UPPER_UNDERSCORE,
                     pk_javaType,
                     pk_comment
@@ -154,6 +159,7 @@ class GeneratorJS(
                     tableName_UPPER_CAMEL,
                     tableName_LOWER_CAMEL,
                     pk_name_LOWER_CAMELE,
+                    pk_name_UPPER_CAMELE,
                     pk_name_UPPER_UNDERSCORE,
                     pk_javaType,
                     pk_comment
@@ -183,6 +189,7 @@ class GeneratorJS(
                     tableName_UPPER_CAMEL,
                     tableName_LOWER_CAMEL,
                     pk_name_LOWER_CAMELE,
+                    pk_name_UPPER_CAMELE,
                     pk_name_UPPER_UNDERSCORE,
                     pk_javaType,
                     pk_comment
@@ -211,6 +218,7 @@ class GeneratorJS(
                     tableName_UPPER_CAMEL,
                     tableName_LOWER_CAMEL,
                     pk_name_LOWER_CAMELE,
+                    pk_name_UPPER_CAMELE,
                     pk_name_UPPER_UNDERSCORE,
                     pk_javaType,
                     pk_comment
