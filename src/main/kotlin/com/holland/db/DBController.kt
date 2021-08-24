@@ -17,7 +17,7 @@ class DBController(
     private val port: String,
     private val user: String,
     private val pwd: String,
-    private val database: String
+    private val database: String,
 ) {
     var schema: String? = null
 
@@ -89,7 +89,9 @@ class DBController(
                 .newInstance(this@DBController)
                 .let {
                     it as FetchTables
-                    it.execute()
+                    it.execute().run {
+                        this.sortedBy { item -> item.name }
+                    }
                 }
         }
     }

@@ -14,8 +14,10 @@ class GeneratorJS(
     private var path: String,
     private var `package`: String,
     private val table: TableTemplate,
-    private val columns: List<ColumnTemplate>
+    private val columns: List<ColumnTemplate>,
 ) {
+    private val package_file_separatorChar: String
+
     private val tableName_UPPER_UNDERSCORE: String
     private val tableName_UPPER_CAMEL: String
     private val tableName_LOWER_CAMEL: String
@@ -28,6 +30,7 @@ class GeneratorJS(
     init {
         path = composePath(path, `package`)
         `package` = composePackage(`package`)
+        package_file_separatorChar = `package`.replace(".", File.separator)
         val pkColumn = columns.firstOrNull { it.pk } ?: columns.getOrNull(0)
 
         tableName_UPPER_UNDERSCORE = table.name
@@ -63,7 +66,7 @@ class GeneratorJS(
             .let {
                 FileUtil.newFile(
                     it?.toString(),
-                    path,
+                    path + File.separatorChar + "java" + File.separatorChar + package_file_separatorChar + File.separatorChar + "controller",
                     "${tableName_UPPER_CAMEL}Controller.java"
                 )
             }
@@ -97,7 +100,7 @@ class GeneratorJS(
             .let {
                 FileUtil.newFile(
                     it.toString(),
-                    path,
+                    path + File.separatorChar + "java" + File.separatorChar + package_file_separatorChar + File.separatorChar + "service",
                     "I${tableName_UPPER_CAMEL}Service.java"
                 )
             }
@@ -126,7 +129,7 @@ class GeneratorJS(
             .let {
                 FileUtil.newFile(
                     it.toString(),
-                    path,
+                    path + File.separatorChar + "java" + File.separatorChar + package_file_separatorChar + File.separatorChar + "service" + File.separatorChar + "impl",
                     "${tableName_UPPER_CAMEL}ServiceImpl.java"
                 )
             }
@@ -160,7 +163,7 @@ class GeneratorJS(
             .let {
                 FileUtil.newFile(
                     it.toString(),
-                    path,
+                    path + File.separatorChar + "java" + File.separatorChar + package_file_separatorChar + File.separatorChar + "mapper",
                     "${tableName_UPPER_CAMEL}Mapper.java"
                 )
             }
@@ -188,7 +191,7 @@ class GeneratorJS(
             }.run {
                 FileUtil.newFile(
                     this.toString(),
-                    path,
+                    path + File.separatorChar + "resources" + File.separatorChar + "mapper",
                     "${tableName_UPPER_CAMEL}Mapper.xml"
                 )
             }
@@ -217,7 +220,7 @@ class GeneratorJS(
             .let {
                 FileUtil.newFile(
                     it?.toString(),
-                    path,
+                    path + File.separatorChar + "java" + File.separatorChar + package_file_separatorChar + File.separatorChar + "pojo",
                     "$tableName_UPPER_CAMEL.java"
                 )
             }
@@ -237,7 +240,7 @@ class GeneratorJS(
     }
 
     private fun composePath(path: String, `package`: String) =
-        if (path.isEmpty()) "temp" else path + File.separatorChar + `package`.replace(".", File.separator)
+        if (path.isEmpty()) "temp" else path /*+ File.separatorChar + `package`.replace(".", File.separator)*/
 
     private fun composePackage(`package`: String) = `package`.replace(File.separator, ".")
 }

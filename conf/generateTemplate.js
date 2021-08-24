@@ -25,15 +25,19 @@
  * @param pk_comment                    主键备注
  * @returns {string}                    返回字符串模板
  */
+
+/**
+ * datasync 模块特供 !!!
+ */
 function generateControl(path, package, table, columns, tableName_UPPER_UNDERSCORE, tableName_UPPER_CAMEL, tableName_LOWER_CAMEL, pk_name_LOWER_CAMELE, pk_name_UPPER_UNDERSCORE, pk_javaType, pk_comment) {
     var datasync_parseTask = '\n\n-----datasync_parseTask-----'
         .appendLine('                    case "' + tableName_UPPER_UNDERSCORE + '":\n' +
             '                        final ' + tableName_UPPER_CAMEL + ' ' + tableName_LOWER_CAMEL + ' = JSON.parseObject(it.getDataInfo(), ' + tableName_UPPER_CAMEL + '.class);\n' +
             '                        ' + tableName_LOWER_CAMEL + '.setDataState("-");\n' +
             '                        if (opType == 3) {\n' +
-            '                            ' + tableName_LOWER_CAMEL + 'Service.delete(' + tableName_LOWER_CAMEL + '.get' + pk_name_UPPER_UNDERSCORE + '());\n' +
+            '                            ' + tableName_LOWER_CAMEL + 'Service.delete(' + tableName_LOWER_CAMEL + '.getSyncId());\n' +
             '                        } else {\n' +
-            '                            if (' + tableName_LOWER_CAMEL + 'Service.isExist(' + tableName_LOWER_CAMEL + '.get' + pk_name_UPPER_UNDERSCORE + '())) {\n' +
+            '                            if (' + tableName_LOWER_CAMEL + 'Service.isExist(' + tableName_LOWER_CAMEL + '.getSyncId())) {\n' +
             '                                ' + tableName_LOWER_CAMEL + 'Service.update(' + tableName_LOWER_CAMEL + ');\n' +
             '                            } else {\n' +
             '                                ' + tableName_LOWER_CAMEL + 'Service.add(' + tableName_LOWER_CAMEL + ');\n' +
@@ -54,9 +58,9 @@ function serviceInterface(path, package, table, columns, tableName_UPPER_UNDERSC
             ' * Holland\'s DB_generate_utils Special Supply HWTDL\n' +
             ' */')
         .appendLine('public interface I' + tableName_UPPER_CAMEL + 'Service {')
-        .appendLine('    boolean isExist(' + pk_javaType + ' ' + pk_name_LOWER_CAMELE + ');\n')
+        .appendLine('    boolean isExist(String syncId);\n')
         .appendLine('    List<' + tableName_UPPER_CAMEL + '> selectAll(Map map);\n')
-        .appendLine('    void delete(' + pk_javaType + ' ' + pk_name_LOWER_CAMELE + ');\n')
+        .appendLine('    void delete(String syncId);\n')
         .appendLine('    void update(' + tableName_UPPER_CAMEL + ' record);\n')
         .appendLine('    void add(' + tableName_UPPER_CAMEL + ' record);\n')
         .appendLine('}')
@@ -83,20 +87,20 @@ function serviceImplement(path, package, table, columns, tableName_UPPER_UNDERSC
         .appendLine('    @Autowired\n' +
             '    private ' + tableName_UPPER_CAMEL + 'Mapper ' + tableName_LOWER_CAMEL + 'Mapper;')
         .appendLine('\n    @Override\n' +
-            '    public boolean isExist(' + pk_javaType + ' ' + pk_name_LOWER_CAMELE + ') {\n' +
-            '        return ' + tableName_LOWER_CAMEL + 'Mapper.count(' + pk_name_LOWER_CAMELE + ') != 0;\n' +
+            '    public boolean isExist(String syncId) {\n' +
+            '        return ' + tableName_LOWER_CAMEL + 'Mapper.count(syncId) > 0;\n' +
             '    }')
         .appendLine('\n    @Override\n' +
             '    public List<' + tableName_UPPER_CAMEL + '> selectAll(Map map) {\n' +
             '        return ' + tableName_LOWER_CAMEL + 'Mapper.selectAllByMap(map);\n' +
             '    }')
         .appendLine('\n    @Override\n' +
-            '    public void delete(' + pk_javaType + ' ID) {\n' +
-            '        ' + tableName_LOWER_CAMEL + 'Mapper.deleteByPrimaryKey(ID);\n' +
+            '    public void delete(String syncId) {\n' +
+            '        ' + tableName_LOWER_CAMEL + 'Mapper.deleteBySyncId(syncId);\n' +
             '    }')
         .appendLine('\n    @Override\n' +
             '    public void update(' + tableName_UPPER_CAMEL + ' record) {\n' +
-            '        ' + tableName_LOWER_CAMEL + 'Mapper.updateByPrimaryKeySelective(record);\n' +
+            '        ' + tableName_LOWER_CAMEL + 'Mapper.updateBySyncIdSelective(record);\n' +
             '    }')
         .appendLine('\n    @Override\n' +
             '    public void add(' + tableName_UPPER_CAMEL + ' record) {\n' +
@@ -117,10 +121,10 @@ function mapperInterface(path, package, table, columns, tableName_UPPER_UNDERSCO
             ' */')
         .appendLine('@Mapper')
         .appendLine('public interface ' + tableName_UPPER_CAMEL + 'Mapper {')
-        .appendLine('    int count(' + pk_javaType + ' ' + pk_name_LOWER_CAMELE + ');\n')
+        .appendLine('    int count(String syncId);\n')
         .appendLine('    List<' + tableName_UPPER_CAMEL + '> selectAllByMap(Map map);\n')
-        .appendLine('    int deleteByPrimaryKey(' + pk_javaType + ' ' + pk_name_LOWER_CAMELE + ');\n')
-        .appendLine('    int updateByPrimaryKeySelective(' + tableName_UPPER_CAMEL + ' record);\n')
+        .appendLine('    int deleteBySyncId(String syncId);\n')
+        .appendLine('    int updateBySyncIdSelective(' + tableName_UPPER_CAMEL + ' record);\n')
         .appendLine('    int insertSelective(' + tableName_UPPER_CAMEL + ' record);')
         .appendLine('}')
 }
@@ -130,7 +134,7 @@ function mapperXml(path, package, table, columns, tableName_UPPER_UNDERSCORE, ta
     var len = columns.length
     var Base_Column_List = '    <sql id="Base_Column_List">'
     var sql_selectAllByMap_item = ''
-    var sql_updateByPrimaryKeySelective_item = ''
+    var sql_updateBySyncIdSelective_item = ''
     var sql_insertSelective_item_1 = ''
     var sql_insertSelective_item_2 = ''
     for (var i = 0; i < len; i++) {
@@ -139,21 +143,21 @@ function mapperXml(path, package, table, columns, tableName_UPPER_UNDERSCORE, ta
 
         Base_Column_List += columns[i].columnName + ','
 
-        sql_selectAllByMap_item += '          <if test="' + columns[i].columnName_LOWER_CAMEL + ' != null and ' + columns[i].columnName_LOWER_CAMEL + ' !=\'\'">AND ' + columns[i].columnName + ' = #{' + columns[i].columnName_LOWER_CAMEL + '}</if>\n'
+        sql_selectAllByMap_item += '          <if test="' + columns[i].columnName_LOWER_CAMEL + ' != null">AND ' + columns[i].columnName + ' = #{' + columns[i].columnName_LOWER_CAMEL + '}</if>\n'
 
-        if (!columns[i].pk) sql_updateByPrimaryKeySelective_item += '          <if test="' + columns[i].columnName_LOWER_CAMEL + ' != null and ' + columns[i].columnName_LOWER_CAMEL + ' !=\'\'">' + columns[i].columnName + ' = #{' + columns[i].columnName_LOWER_CAMEL + '}</if>\n'
+        if (!columns[i].pk) sql_updateBySyncIdSelective_item += '          <if test="' + columns[i].columnName_LOWER_CAMEL + ' != null">' + columns[i].columnName + ' = #{' + columns[i].columnName_LOWER_CAMEL + '}</if>\n'
 
-        sql_insertSelective_item_1 += '            <if test="' + columns[i].columnName_LOWER_CAMEL + ' != null" >' + columns[i].columnName + ',</if>\n'
-        sql_insertSelective_item_2 += '          <if test="' + columns[i].columnName_LOWER_CAMEL + ' != null" >#{' + columns[i].columnName_LOWER_CAMEL + '},</if>\n'
+        sql_insertSelective_item_1 += '            <if test="' + columns[i].columnName_LOWER_CAMEL + ' != null">' + columns[i].columnName + ',</if>\n'
+        sql_insertSelective_item_2 += '          <if test="' + columns[i].columnName_LOWER_CAMEL + ' != null">#{' + columns[i].columnName_LOWER_CAMEL + '},</if>\n'
     }
     resultMap += ('   </resultMap>')
     Base_Column_List = Base_Column_List.substring(0, Base_Column_List.lastIndexOf(",")) + '</sql>'
 
-    var sql_count = '   <select id="count" resultType="java.lang.Integer" parameterType="java.lang.' + pk_javaType + '">\n' +
+    var sql_count = '   <select id="count" resultType="java.lang.Integer" parameterType="java.lang.Long">\n' +
         '        select\n' +
         '        count(1)\n' +
         '        from ' + tableName_UPPER_UNDERSCORE + '\n' +
-        '        where ' + pk_name_UPPER_UNDERSCORE + ' = #{' + pk_name_LOWER_CAMELE + '}\n' +
+        '        where SYNC_ID = #{syncId}\n' +
         '    </select>'
 
     var sql_selectAllByMap = '    <select id="selectAllByMap" resultMap="BaseResultMap" parameterType="java.util.Map">\n' +
@@ -165,18 +169,18 @@ function mapperXml(path, package, table, columns, tableName_UPPER_UNDERSCORE, ta
         '        </where>\n' +
         '    </select>'
 
-    var sql_deleteByPrimaryKey = '    <delete id="deleteByPrimaryKey" parameterType="java.lang.' + pk_javaType + '">\n' +
+    var sql_deleteBySyncId = '    <delete id="deleteBySyncId" parameterType="java.lang.Long">\n' +
         '        delete  \n' +
         '        from  ' + tableName_UPPER_UNDERSCORE + '\n' +
-        '        where ' + pk_name_UPPER_UNDERSCORE + ' = #{' + pk_name_LOWER_CAMELE + '}\n' +
+        '        where SYNC_ID = #{syncId}\n' +
         '    </delete>'
 
-    var sql_updateByPrimaryKeySelective = '    <update id="updateByPrimaryKeySelective" parameterType="' + package + '.pojo.' + tableName_UPPER_CAMEL + '" >\n' +
+    var sql_updateBySyncIdSelective = '    <update id="updateBySyncIdSelective" parameterType="' + package + '.pojo.' + tableName_UPPER_CAMEL + '" >\n' +
         '         update ' + tableName_UPPER_UNDERSCORE + '\n' +
         '         <set >\n' +
-        sql_updateByPrimaryKeySelective_item +
+        sql_updateBySyncIdSelective_item +
         '         </set>\n' +
-        '        where ' + pk_name_UPPER_UNDERSCORE + ' = #{' + pk_name_LOWER_CAMELE + '}\n' +
+        '        where SYNC_ID = #{syncId}\n' +
         '    </update>'
 
     var sql_insertSelective = '    <insert id="insertSelective" parameterType="' + package + '.pojo.' + tableName_UPPER_CAMEL + '" >\n' +
@@ -196,8 +200,8 @@ function mapperXml(path, package, table, columns, tableName_UPPER_UNDERSCORE, ta
             .appendLine(Base_Column_List)
             .appendLine(sql_count)
             .appendLine(sql_selectAllByMap)
-            .appendLine(sql_deleteByPrimaryKey)
-            .appendLine(sql_updateByPrimaryKeySelective)
+            .appendLine(sql_deleteBySyncId)
+            .appendLine(sql_updateBySyncIdSelective)
             .appendLine(sql_insertSelective)
             .appendLine('</mapper>')
 }
@@ -212,10 +216,10 @@ function generatePojo(path, package, table, columns, tableName_UPPER_UNDERSCORE,
             '     * ' + columns[i].comments + '\n' +
             '     */\n' +
             '    private ' + columns[i].javaDataType + ' ' + columns[i].columnName_LOWER_CAMEL + ';')
-        itemGet += '\n    public String get' + columns[i].columnName_UPPER_CAMEL + '() {\n' +
+        itemGet += '\n    public ' + columns[i].javaDataType + ' get' + columns[i].columnName_UPPER_CAMEL + '() {\n' +
             '        return ' + columns[i].columnName_LOWER_CAMEL + ';\n' +
             '    }'
-        itemSet += '\n    public ' + tableName_UPPER_CAMEL + ' set' + columns[i].columnName_UPPER_CAMEL + '(String ' + columns[i].columnName_LOWER_CAMEL + ') {\n' +
+        itemSet += '\n    public ' + tableName_UPPER_CAMEL + ' set' + columns[i].columnName_UPPER_CAMEL + '(' + columns[i].javaDataType + ' ' + columns[i].columnName_LOWER_CAMEL + ') {\n' +
             '        this.' + columns[i].columnName_LOWER_CAMEL + ' = ' + columns[i].columnName_LOWER_CAMEL + ';\n' +
             '        return this;\n' +
             '    }'
