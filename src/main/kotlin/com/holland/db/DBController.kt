@@ -184,45 +184,34 @@ class DBController(
         }
     }
 
-//    fun generatePojo(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>) =
-//        Generator(path, `package`, table, columns).generatePojo()
-//
-//    fun generateMapper(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>) =
-//        Generator(path, `package`, table, columns).generateMapper()
-//
-//    fun generateService(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>) =
-//        Generator(path, `package`, table, columns).generateService()
-//
-//    fun generateControl(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>) =
-//        Generator(path, `package`, table, columns).generateControl()
-//
-//    fun generateBe(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>) {
-//        Generator(path, `package`, table, columns).let {
-//            it.generatePojo()
-//            it.generateMapper()
-//            it.generateService()
-//            it.generateControl()
-//        }
-//    }
+    fun generatePojo(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>, choice_code_template: String) =
+        GeneratorJS(path, `package`, table, columns, choice_code_template).generatePojo()
 
-    fun generatePojo(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>) =
-        GeneratorJS(path, `package`, table, columns).generatePojo()
+    fun generateMapper(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>, choice_code_template: String) =
+        GeneratorJS(path, `package`, table, columns, choice_code_template).generateMapper()
 
-    fun generateMapper(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>) =
-        GeneratorJS(path, `package`, table, columns).generateMapper()
+    fun generateService(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>, choice_code_template: String) =
+        GeneratorJS(path, `package`, table, columns, choice_code_template).generateService()
 
-    fun generateService(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>) =
-        GeneratorJS(path, `package`, table, columns).generateService()
+    fun generateControl(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>, choice_code_template: String) =
+        GeneratorJS(path, `package`, table, columns, choice_code_template).generateControl()
 
-    fun generateControl(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>) =
-        GeneratorJS(path, `package`, table, columns).generateControl()
-
-    fun generateBe(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>) {
-        GeneratorJS(path, `package`, table, columns).let {
+    fun generateBe(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>, choice_code_template: String) {
+        GeneratorJS(path, `package`, table, columns, choice_code_template).let {
             it.generatePojo()
             it.generateMapper()
             it.generateService()
             it.generateControl()
         }
+    }
+
+    fun generateCreateTableSql(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>) {
+        Class.forName("com.holland.db.service.impl.${dataSource.lowerCase}.${dataSource.upperCamelCase}CreateTableByViewImpl")
+            .getDeclaredConstructor()
+            .newInstance()
+            .let {
+                it as CreateTableByView
+                it.execute(path, `package`, table, columns)
+            }
     }
 }

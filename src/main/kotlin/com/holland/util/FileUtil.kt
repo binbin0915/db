@@ -55,4 +55,11 @@ object FileUtil {
             file.readLines().toTypedArray()
         } else arrayOf()
     }
+
+    fun readDir(path: String): Array<out String>? {
+        val file = File(path)
+        return if (file.exists() && file.isDirectory) {
+            file.list()
+        } else null
+    }
 }

@@ -1,4 +1,4 @@
-package com.holland.ui
+package com.holland.javafx
 
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser

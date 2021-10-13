@@ -1,4 +1,4 @@
-package com.holland.ui
+package com.holland.javafx
 
 import com.holland.db.DBController
 import com.holland.db.DataSource.MYSQL

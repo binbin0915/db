@@ -1,4 +1,4 @@
-package com.holland.ui
+package com.holland.javafx
 
 import com.google.common.base.CaseFormat
 import com.holland.db.DBController
@@ -8,6 +8,7 @@ import com.holland.db.service.ColumnTemplate
 import com.holland.db.service.TableTemplate
 import com.holland.util.FileUtil
 import com.holland.util.UiUtil
+import com.sun.javafx.collections.ImmutableObservableList
 import javafx.application.Application
 import javafx.event.EventHandler
 import javafx.fxml.FXMLLoader
@@ -26,10 +27,9 @@ class GenerateCode : Application() {
     private lateinit var choice_table: ChoiceBox<String>
     private lateinit var list_table: ListView<String>
     private lateinit var list_column: TableView<ColumnTemplate>
-    private lateinit var text_fe: TextField
+    private lateinit var choice_code_template: ChoiceBox<String>
     private lateinit var text_be: TextField
     private lateinit var text_package: TextField
-    private lateinit var btn_fe: Button
     private lateinit var btn_be: Button
 
     private lateinit var btn_gr_pojo: Button
@@ -37,7 +37,7 @@ class GenerateCode : Application() {
     private lateinit var btn_gr_service: Button
     private lateinit var btn_gr_control: Button
     private lateinit var btn_gr_be: Button
-    private lateinit var btn_gr_fe: Button
+    private lateinit var btn_gr_sql: Button
 
     private lateinit var btn_show_params: Button
 
@@ -60,10 +60,9 @@ class GenerateCode : Application() {
         list_table = pane.lookup("#list_table") as ListView<String>
         list_column = pane.lookup("#list_column") as TableView<ColumnTemplate>
 
-        text_fe = pane.lookup("#text_fe") as TextField
+        choice_code_template = pane.lookup("#choice_code_template") as ChoiceBox<String>
         text_be = pane.lookup("#text_be") as TextField
         text_package = pane.lookup("#text_package") as TextField
-        btn_fe = pane.lookup("#btn_fe") as Button
         btn_be = pane.lookup("#btn_be") as Button
 
         btn_gr_pojo = pane.lookup("#btn_gr_pojo") as Button
@@ -71,9 +70,18 @@ class GenerateCode : Application() {
         btn_gr_service = pane.lookup("#btn_gr_service") as Button
         btn_gr_control = pane.lookup("#btn_gr_control") as Button
         btn_gr_be = pane.lookup("#btn_gr_be") as Button
-        btn_gr_fe = pane.lookup("#btn_gr_fe") as Button
+        btn_gr_sql = pane.lookup("#btn_gr_sql") as Button
 
         btn_show_params = pane.lookup("#btn_show_params") as Button
+
+        with(choice_code_template) {
+            value = "generateTemplate.js"
+            val toTypedArray = FileUtil.readDir("conf")
+                ?.filter {
+                    it.matches(Regex("^generateTemplate.*.js$"))
+                }!!.toTypedArray()
+            items = ImmutableObservableList(*toTypedArray)
+        }
 
         with(TableColumn<ColumnTemplate, String>("字段名")) {
             cellValueFactory = PropertyValueFactory("columnName")
@@ -103,31 +111,36 @@ class GenerateCode : Application() {
         btn_gr_pojo.onAction =
             EventHandler {
                 if (!isChooseTable()) return@EventHandler
-                dbController.generatePojo(text_be.text, text_package.text, table!!, columns)
+                dbController.generatePojo(text_be.text, text_package.text, table!!, columns,choice_code_template.value)
             }
         btn_gr_mapper.onAction =
             EventHandler {
                 if (!isChooseTable()) return@EventHandler
-                dbController.generateMapper(text_be.text, text_package.text, table!!, columns)
+                dbController.generateMapper(text_be.text, text_package.text, table!!, columns,choice_code_template.value)
             }
         btn_gr_service.onAction =
             EventHandler {
                 if (!isChooseTable()) return@EventHandler
-                dbController.generateService(text_be.text, text_package.text, table!!, columns)
+                dbController.generateService(text_be.text, text_package.text, table!!, columns,choice_code_template.value)
             }
         btn_gr_control.onAction =
             EventHandler {
                 if (!isChooseTable()) return@EventHandler
-                dbController.generateControl(text_be.text, text_package.text, table!!, columns)
+                dbController.generateControl(text_be.text, text_package.text, table!!, columns,choice_code_template.value)
             }
         btn_gr_be.onAction =
             EventHandler {
                 if (!isChooseTable()) return@EventHandler
-                dbController.generateBe(text_be.text, text_package.text, table!!, columns)
+                dbController.generateBe(text_be.text, text_package.text, table!!, columns,choice_code_template.value)
             }
 
-        btn_fe.onAction = EventHandler { text_fe.text = UiUtil.openFolderChooser(primaryStage)?.path }
         btn_be.onAction = EventHandler { text_be.text = UiUtil.openFolderChooser(primaryStage)?.path }
+
+        btn_gr_sql.onAction =
+            EventHandler {
+                if (!isChooseTable()) return@EventHandler
+                dbController.generateCreateTableSql(text_be.text, text_package.text, table!!, columns)
+            }
 
         btn_show_params.onAction = EventHandler {
             FileUtil.newFile(run {
@@ -137,12 +150,16 @@ class GenerateCode : Application() {
                     |table                         $table
                     |tableName_UPPER_UNDERSCORE    ${table!!.name}
                     |tableName_UPPER_CAMEL         ${
-                    CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL,
-                        table!!.name)
+                    CaseFormat.UPPER_UNDERSCORE.to(
+                        CaseFormat.UPPER_CAMEL,
+                        table!!.name
+                    )
                 }
                     |tableName_LOWER_CAMEL         ${
-                    CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL,
-                        table!!.name)
+                    CaseFormat.UPPER_UNDERSCORE.to(
+                        CaseFormat.LOWER_CAMEL,
+                        table!!.name
+                    )
                 }
                 """.trimMargin()
                     .let {
@@ -151,7 +168,8 @@ class GenerateCode : Application() {
                             |
                             |pk_name_LOWER_CAMELE          ${
                             if (null == pkColumn) "key" else CaseFormat.UPPER_UNDERSCORE.to(
-                                CaseFormat.LOWER_CAMEL, pkColumn.columnName)
+                                CaseFormat.LOWER_CAMEL, pkColumn.columnName
+                            )
                         }
                             |pk_name_UPPER_UNDERSCORE      ${pkColumn?.columnName ?: "KEY"}
                             |pk_javaType                   ${pkColumn?.javaDataType ?: "String"}

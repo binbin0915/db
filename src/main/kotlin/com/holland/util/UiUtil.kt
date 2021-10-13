@@ -1,6 +1,6 @@
 package com.holland.util
 
-import com.holland.ui.Connect
+import com.holland.javafx.Connect
 import javafx.event.ActionEvent
 import javafx.scene.control.Alert
 import javafx.scene.control.Menu

@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.text.Text?>
 <AnchorPane layoutY="1.0" prefHeight="400.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8"
-            xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.holland.ui.GenerateTable">
+            xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.holland.javafx.GenerateTable">
    <MenuBar id="menu_bar" prefHeight="25.0" prefWidth="800.0"/>
    <TableView id="list_column" layoutY="48.0" prefHeight="300.0" prefWidth="800.0"/>
    <HBox layoutY="25.0" prefHeight="23.0" prefWidth="800.0">

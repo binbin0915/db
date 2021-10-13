@@ -15,6 +15,7 @@ class GeneratorJS(
     private var `package`: String,
     private val table: TableTemplate,
     private val columns: List<ColumnTemplate>,
+    private val choice_code_template: String,
 ) {
     private val package_file_separatorChar: String
 
@@ -48,7 +49,7 @@ class GeneratorJS(
     fun generateControl() {
         ScriptEngineManager().getEngineByName("javascript")
             .let {
-                it.eval(FileReader("conf/generateTemplate.js"))
+                it.eval(FileReader("conf/${choice_code_template}"))
                 val invokeFunction = (it as NashornScriptEngine).invokeFunction(
                     "generateControl",
                     path,
@@ -83,7 +84,7 @@ class GeneratorJS(
     private fun serviceInterface() {
         ScriptEngineManager().getEngineByName("javascript")
             .let {
-                it.eval(FileReader("conf/generateTemplate.js"))
+                it.eval(FileReader("conf/${choice_code_template}"))
                 val invokeFunction = (it as NashornScriptEngine).invokeFunction(
                     "serviceInterface",
                     path,
@@ -113,7 +114,7 @@ class GeneratorJS(
     private fun serviceImplement() {
         ScriptEngineManager().getEngineByName("javascript")
             .let {
-                it.eval(FileReader("conf/generateTemplate.js"))
+                it.eval(FileReader("conf/${choice_code_template}"))
                 val invokeFunction = (it as NashornScriptEngine).invokeFunction(
                     "serviceImplement",
                     path,
@@ -148,7 +149,7 @@ class GeneratorJS(
     private fun mapperInterface() {
         ScriptEngineManager().getEngineByName("javascript")
             .let {
-                it.eval(FileReader("conf/generateTemplate.js"))
+                it.eval(FileReader("conf/${choice_code_template}"))
                 val invokeFunction = (it as NashornScriptEngine).invokeFunction(
                     "mapperInterface",
                     path,
@@ -178,7 +179,7 @@ class GeneratorJS(
     private fun mapperXml() {
         ScriptEngineManager().getEngineByName("javascript")
             .let {
-                it.eval(FileReader("conf/generateTemplate.js"))
+                it.eval(FileReader("conf/${choice_code_template}"))
                 val invokeFunction = (it as NashornScriptEngine).invokeFunction(
                     "mapperXml",
                     path,
@@ -207,7 +208,7 @@ class GeneratorJS(
     fun generatePojo() {
         ScriptEngineManager().getEngineByName("javascript")
             .let {
-                it.eval(FileReader("conf/generateTemplate.js"))
+                it.eval(FileReader("conf/${choice_code_template}"))
                 val invokeFunction = (it as NashornScriptEngine).invokeFunction(
                     "generatePojo",
                     path,
