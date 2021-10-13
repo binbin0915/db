@@ -25,7 +25,8 @@ class OracleCreateTableByViewImpl : CreateTableByView {
          */
         val list1 = arrayListOf<String>()
         val list2 = arrayListOf<String>()
-        var pksql = ""
+        var pkSql = ""
+        var sequenceSql = ""
         columns.forEach {
             list1.add(
                 "\t" + it.columnName + " "
@@ -38,8 +39,10 @@ class OracleCreateTableByViewImpl : CreateTableByView {
             )
             if (it.comments != null) list2.add("""comment on column ${table.name}.${it.columnName} is '${it.comments}';""")
 
-            if (it.pk) pksql =
-                """alter table ${table.name} add constraint PK_${table.name} primary key (${it.columnName});"""
+            if (it.pk) {
+                pkSql = "alter table ${table.name} add constraint PK_${table.name} primary key (${it.columnName});"
+                sequenceSql = "create sequence SEQ_${table.name};"
+            }
         }
 
         FileUtil.newFile(run {
@@ -50,9 +53,11 @@ class OracleCreateTableByViewImpl : CreateTableByView {
                 |)
                 |;
                 |
-                |$pksql
+                |$pkSql
                 |
                 |${list2.joinToString("\n")}
+                |
+                |$sequenceSql
             """.trimMargin()
         }, ".${File.separatorChar}temp", "temp_sql.txt")
         Runtime.getRuntime()
