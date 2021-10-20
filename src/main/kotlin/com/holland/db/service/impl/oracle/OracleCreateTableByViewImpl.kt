@@ -40,7 +40,7 @@ class OracleCreateTableByViewImpl : CreateTableByView {
             if (it.comments != null) list2.add("""comment on column ${table.name}.${it.columnName} is '${it.comments}';""")
 
             if (it.pk) {
-                pkSql = "alter table ${table.name} add constraint PK_${table.name} primary key (${it.columnName});"
+                pkSql += "alter table ${table.name} add constraint PK_${table.name} primary key (${it.columnName});"
                 sequenceSql = "create sequence SEQ_${table.name};"
             }
         }
