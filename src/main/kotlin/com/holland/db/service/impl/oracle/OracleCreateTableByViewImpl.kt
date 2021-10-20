@@ -53,14 +53,16 @@ class OracleCreateTableByViewImpl : CreateTableByView {
                 |)
                 |;
                 |
+                |${if (table.comment != null) "comment on table ${table.name} is '${table.comment}';" else ""}
+                |
                 |$pkSql
                 |
                 |${list2.joinToString("\n")}
                 |
                 |$sequenceSql
             """.trimMargin()
-        }, ".${File.separatorChar}temp", "temp_sql.txt")
+        }, ".${File.separatorChar}sql", "${table.name}.txt")
         Runtime.getRuntime()
-            .exec(arrayOf("cmd", "/C", "start ${".${File.separatorChar}temp${File.separatorChar}temp_sql.txt"}"))
+            .exec(arrayOf("cmd", "/C", "start ${".${File.separatorChar}sql${File.separatorChar}${table.name}.txt"}"))
     }
 }
