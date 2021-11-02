@@ -3,11 +3,9 @@ package com.holland.db.service.impl.oracle
 import com.holland.db.service.ColumnTemplate
 import com.holland.db.service.CreateTableByView
 import com.holland.db.service.TableTemplate
-import com.holland.util.FileUtil
-import java.io.File
 
 class OracleCreateTableByViewImpl : CreateTableByView {
-    override fun execute(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>) {
+    override fun execute(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>): String {
         /**
          * template
          *
@@ -45,8 +43,7 @@ class OracleCreateTableByViewImpl : CreateTableByView {
             }
         }
 
-        FileUtil.newFile(run {
-            """
+        return """
                 |create table ${table.name}
                 |(
                 |${list1.joinToString(",\n")}
@@ -61,8 +58,5 @@ class OracleCreateTableByViewImpl : CreateTableByView {
                 |
                 |$sequenceSql
             """.trimMargin()
-        }, ".${File.separatorChar}sql", "${table.name}.txt")
-        Runtime.getRuntime()
-            .exec(arrayOf("cmd", "/C", "start ${".${File.separatorChar}sql${File.separatorChar}${table.name}.txt"}"))
     }
 }

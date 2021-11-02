@@ -6,6 +6,7 @@ import javafx.scene.control.Alert
 import javafx.scene.control.Menu
 import javafx.scene.control.MenuBar
 import javafx.scene.control.MenuItem
+import javafx.scene.image.Image
 import javafx.stage.DirectoryChooser
 import javafx.stage.Stage
 import java.io.File
@@ -29,6 +30,14 @@ object UiUtil {
             FileUtil.newFile(selectedFolder.path, "conf", "recent_file.conf")
             selectedFolder
         } else null
+    }
+
+    fun initIcon(primaryStage: Stage) {
+        try {
+            primaryStage.icons.add(Image("./img/Psyduck.jpg"))
+        } catch (e: Exception) {
+
+        }
     }
 
     fun initMenu(menuBar: MenuBar) {
@@ -58,7 +67,7 @@ object UiUtil {
                 },
                 "版本" to {
                     Alert(Alert.AlertType.INFORMATION).apply {
-                        contentText = "版本日期 2021年4月15日"
+                        contentText = "版本日期 2021年10月28日"
                         show()
                     }
                 }

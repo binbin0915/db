@@ -40,6 +40,7 @@ class GenerateTable : Application() {
         val pane = FXMLLoader.load<Parent>(javaClass.getResource("/GenerateTable.fxml"))
         primaryStage.scene = Scene(pane, 800.0, 400.0)
         primaryStage.title = "数据库代码生成工具"
+        UiUtil.initIcon(primaryStage)
         primaryStage.show()
 
         menu_bar = pane.lookup("#menu_bar") as MenuBar

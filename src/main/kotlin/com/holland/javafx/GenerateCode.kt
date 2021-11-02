@@ -38,6 +38,7 @@ class GenerateCode : Application() {
     private lateinit var btn_gr_control: Button
     private lateinit var btn_gr_be: Button
     private lateinit var btn_gr_sql: Button
+    private lateinit var btn_gr_custom: Button
 
     private lateinit var btn_show_params: Button
 
@@ -52,6 +53,7 @@ class GenerateCode : Application() {
         val pane = FXMLLoader.load<Parent>(javaClass.getResource("/GenerateCode.fxml"))
         primaryStage.scene = Scene(pane, 700.0, 450.0)
         primaryStage.title = "数据库代码生成工具"
+        UiUtil.initIcon(primaryStage)
         primaryStage.show()
 
         menu_bar = pane.lookup("#menu") as MenuBar
@@ -71,6 +73,7 @@ class GenerateCode : Application() {
         btn_gr_control = pane.lookup("#btn_gr_control") as Button
         btn_gr_be = pane.lookup("#btn_gr_be") as Button
         btn_gr_sql = pane.lookup("#btn_gr_sql") as Button
+        btn_gr_custom = pane.lookup("#btn_gr_custom") as Button
 
         btn_show_params = pane.lookup("#btn_show_params") as Button
 
@@ -85,6 +88,7 @@ class GenerateCode : Application() {
 
         with(TableColumn<ColumnTemplate, String>("字段名")) {
             cellValueFactory = PropertyValueFactory("columnName")
+            prefWidth = 120.0
             list_column.columns.add(this)
         }
         with(TableColumn<ColumnTemplate, String>("字段类型")) {
@@ -111,27 +115,45 @@ class GenerateCode : Application() {
         btn_gr_pojo.onAction =
             EventHandler {
                 if (!isChooseTable()) return@EventHandler
-                dbController.generatePojo(text_be.text, text_package.text, table!!, columns,choice_code_template.value)
+                dbController.generatePojo(text_be.text, text_package.text, table!!, columns, choice_code_template.value)
             }
         btn_gr_mapper.onAction =
             EventHandler {
                 if (!isChooseTable()) return@EventHandler
-                dbController.generateMapper(text_be.text, text_package.text, table!!, columns,choice_code_template.value)
+                dbController.generateMapper(
+                    text_be.text,
+                    text_package.text,
+                    table!!,
+                    columns,
+                    choice_code_template.value
+                )
             }
         btn_gr_service.onAction =
             EventHandler {
                 if (!isChooseTable()) return@EventHandler
-                dbController.generateService(text_be.text, text_package.text, table!!, columns,choice_code_template.value)
+                dbController.generateService(
+                    text_be.text,
+                    text_package.text,
+                    table!!,
+                    columns,
+                    choice_code_template.value
+                )
             }
         btn_gr_control.onAction =
             EventHandler {
                 if (!isChooseTable()) return@EventHandler
-                dbController.generateControl(text_be.text, text_package.text, table!!, columns,choice_code_template.value)
+                dbController.generateControl(
+                    text_be.text,
+                    text_package.text,
+                    table!!,
+                    columns,
+                    choice_code_template.value
+                )
             }
         btn_gr_be.onAction =
             EventHandler {
                 if (!isChooseTable()) return@EventHandler
-                dbController.generateBe(text_be.text, text_package.text, table!!, columns,choice_code_template.value)
+                dbController.generateBe(text_be.text, text_package.text, table!!, columns, choice_code_template.value)
             }
 
         btn_be.onAction = EventHandler { text_be.text = UiUtil.openFolderChooser(primaryStage)?.path }
@@ -140,6 +162,12 @@ class GenerateCode : Application() {
             EventHandler {
                 if (!isChooseTable()) return@EventHandler
                 dbController.generateCreateTableSql(text_be.text, text_package.text, table!!, columns)
+            }
+
+        btn_gr_custom.onAction =
+            EventHandler {
+                if (!isChooseTable()) return@EventHandler
+                dbController.generateCustom(text_be.text, text_package.text, table!!, columns, choice_code_template.value)
             }
 
         btn_show_params.onAction = EventHandler {

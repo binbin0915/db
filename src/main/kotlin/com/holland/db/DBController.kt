@@ -211,7 +211,11 @@ class DBController(
             .newInstance()
             .let {
                 it as CreateTableByView
-                it.execute(path, `package`, table, columns)
+                it.doIt(path, `package`, table, columns)
             }
+    }
+
+    fun generateCustom(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>, choice_code_template: String) {
+        GeneratorJS(path, `package`, table, columns, choice_code_template).generateCustom()
     }
 }

@@ -166,6 +166,20 @@ function generatePojo(path, package, table, columns, tableName_UPPER_UNDERSCORE,
         .appendLine('}')
 }
 
+function generateCustom(path, package, table, columns, tableName_UPPER_UNDERSCORE, tableName_UPPER_CAMEL, tableName_LOWER_CAMEL, pk_name_LOWER_CAMELE, pk_name_UPPER_CAMELE, pk_name_UPPER_UNDERSCORE, pk_javaType, pk_comment) {
+    var fileName = tableName_UPPER_UNDERSCORE.toLowerCase() + '.txt'//这里定义文件名
+    var prefix = ''//这里定义id前缀
+    var suffix = ''//这里定义id后缀
+    var len = columns.length
+    var content = ''
+    for (var i = 0; i < len; i++) {
+        content += '<td class="right">' + columns[i].comments + '</td>\n' +
+            '<td id="' + prefix + columns[i].columnName_LOWER_CAMEL + suffix + '"></td>\n\n'
+    }
+
+    return {fileName: fileName, content: content}
+}
+
 String.prototype.appendLine = function (newLine) {
     return this + '\n' + newLine
 }

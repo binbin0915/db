@@ -7,6 +7,7 @@ import com.holland.db.DataSource
 import com.holland.util.FileUtil
 import com.holland.util.RegUtil
 import com.holland.util.TimeUtil
+import com.holland.util.UiUtil
 import com.sun.javafx.collections.ImmutableObservableList
 import javafx.application.Application
 import javafx.event.ActionEvent
@@ -31,10 +32,26 @@ class Connect : Application() {
             vgap = 10.0
             padding = Insets(25.0, 25.0, 25.0, 25.0)
 
+            val comparator = Comparator<String> { o1, o2 ->
+                val m1 = JsonParser.parseString(o1).asJsonObject
+                val m2 = JsonParser.parseString(o2).asJsonObject
+                var i = m1["dataSource"]!!.asString.compareTo(m2["dataSource"]!!.asString)
+                if (i == 0) {
+                    i = m1["host"]!!.asString.compareTo(m2["host"]!!.asString)
+                    if (i == 0) {
+                        m1["user"]!!.asString.compareTo(m2["user"]!!.asString)
+                    } else i
+                } else i
+            }
             val choice_database = ChoiceBox(ImmutableObservableList(*DataSource.values().copyOf()))
             choice_database.value = DataSource.ORACLE
             val choice_history =
-                ChoiceBox(ImmutableObservableList("历史记录", *FileUtil.readFile4Line("conf", "db_connect.conf")))
+                ChoiceBox(
+                    ImmutableObservableList(
+                        "历史记录",
+                        *FileUtil.readFile4Line("conf", "db_connect.conf").sortedArrayWith(comparator)
+                    )
+                )
             add(choice_database, 0, row)
             add(choice_history, 1, row++)
 
@@ -111,6 +128,7 @@ class Connect : Application() {
 
         primaryStage!!.scene = Scene(pane, 330.0, 250.0)
         primaryStage.title = "数据库代码生成工具"
+        UiUtil.initIcon(primaryStage)
         primaryStage.show()
     }
 

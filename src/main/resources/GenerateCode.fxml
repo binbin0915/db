@@ -10,24 +10,25 @@
 <AnchorPane prefHeight="450.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.holland.javafx.GenerateCode">
    <children>
        <MenuBar id="menu" layoutY="1.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="25.0" prefWidth="700.0" />
-       <ListView id="list_table" layoutY="50.0" prefHeight="400.0" prefWidth="130.0" />
+       <ListView id="list_table" layoutY="50.0" prefHeight="400.0" prefWidth="157.0" />
        <Button id="refresh_table" layoutY="25.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="50.0" text="刷新" />
-       <ChoiceBox id="choice_table" layoutX="50.0" layoutY="25.0" prefHeight="25.0" prefWidth="80.0" />
-       <TableView id="list_column" layoutX="130.0" layoutY="77.0" prefHeight="328.0" prefWidth="570.0">
+       <ChoiceBox id="choice_table" layoutX="50.0" layoutY="25.0" prefHeight="25.0" prefWidth="106.0" />
+       <TableView id="list_column" layoutX="157.0" layoutY="74.0" prefHeight="331.0" prefWidth="543.0">
     </TableView>
-       <Text layoutX="132.0" layoutY="42.0" strokeType="OUTSIDE" strokeWidth="0.0" text="代码模板" />
-       <Text layoutX="132.0" layoutY="67.0" strokeType="OUTSIDE" strokeWidth="0.0" text="后端路径" />
-       <Text layoutX="449.0" layoutY="43.0" strokeType="OUTSIDE" strokeWidth="0.0" text="包前缀" />
-       <TextField id="text_be" layoutX="182.0" layoutY="52.0" prefHeight="23.0" prefWidth="476.0" promptText="指定到'main'模块就好了，默认生成到运行文件下的temp、sql文件夹" />
-       <TextField id="text_package" layoutX="489.0" layoutY="27.0" prefHeight="23.0" prefWidth="209.0" text="com.holland" />
+       <Text layoutX="159.0" layoutY="43.0" strokeType="OUTSIDE" strokeWidth="0.0" text="代码模板" wrappingWidth="50.0" />
+       <Text layoutX="159.0" layoutY="68.0" strokeType="OUTSIDE" strokeWidth="0.0" text="后端路径" />
+       <Text layoutX="487.0" layoutY="43.0" strokeType="OUTSIDE" strokeWidth="0.0" text="包前缀" />
+       <TextField id="text_be" layoutX="210.0" layoutY="52.0" prefHeight="23.0" prefWidth="448.0" promptText="指定到'main'模块就好了，默认生成到运行文件下的temp、sql文件夹" />
+       <TextField id="text_package" layoutX="525.0" layoutY="27.0" prefHeight="23.0" prefWidth="173.0" text="com.holland" />
        <Button id="btn_be" layoutX="658.0" layoutY="52.0" mnemonicParsing="false" text="选择" />
-       <Button id="btn_gr_pojo" layoutX="218.0" layoutY="428.0" mnemonicParsing="false" text="生成pojo" />
-       <Button id="btn_gr_mapper" layoutX="285.0" layoutY="428.0" mnemonicParsing="false" text="生成mapper" />
-       <Button id="btn_gr_service" layoutX="369.0" layoutY="428.0" mnemonicParsing="false" text="生成service" />
-       <Button id="btn_gr_control" layoutX="449.0" layoutY="428.0" mnemonicParsing="false" text="生成control" />
-       <Button id="btn_gr_be" layoutX="130.0" layoutY="428.0" mnemonicParsing="false" text="生成后端项目" />
-       <Button id="btn_gr_sql" layoutX="130.0" layoutY="405.0" mnemonicParsing="false" text="生成建表语句" />
+       <Button id="btn_gr_pojo" layoutX="245.0" layoutY="428.0" mnemonicParsing="false" text="生成pojo" />
+       <Button id="btn_gr_mapper" layoutX="312.0" layoutY="428.0" mnemonicParsing="false" text="生成mapper" />
+       <Button id="btn_gr_service" layoutX="396.0" layoutY="428.0" mnemonicParsing="false" text="生成service" />
+       <Button id="btn_gr_control" layoutX="476.0" layoutY="428.0" mnemonicParsing="false" text="生成control" />
+       <Button id="btn_gr_be" layoutX="157.0" layoutY="428.0" mnemonicParsing="false" text="生成后端项目" />
+       <Button id="btn_gr_sql" layoutX="157.0" layoutY="405.0" mnemonicParsing="false" text="生成建表语句" />
       <Button id="btn_show_params" layoutX="636.0" layoutY="428.0" mnemonicParsing="false" text="查看参数" />
-      <ChoiceBox id="choice_code_template" layoutX="183.0" layoutY="27.0" prefHeight="23.0" prefWidth="263.0" />
+      <ChoiceBox id="choice_code_template" layoutX="210.0" layoutY="27.0" prefHeight="23.0" prefWidth="275.0" />
+      <Button id="btn_gr_custom" layoutX="245.0" layoutY="405.0" mnemonicParsing="false" text="生成自定义的文件" />
    </children>
 </AnchorPane>

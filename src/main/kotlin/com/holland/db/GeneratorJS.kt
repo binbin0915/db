@@ -5,6 +5,7 @@ import com.holland.db.service.ColumnTemplate
 import com.holland.db.service.TableTemplate
 import com.holland.util.FileUtil
 import jdk.nashorn.api.scripting.NashornScriptEngine
+import jdk.nashorn.api.scripting.ScriptObjectMirror
 import java.io.File
 import java.io.FileReader
 import javax.script.ScriptEngineManager
@@ -232,6 +233,33 @@ class GeneratorJS(
                     path + File.separatorChar + "java" + File.separatorChar + package_file_separatorChar + File.separatorChar + "pojo",
                     "$tableName_UPPER_CAMEL.java"
                 )
+            }
+    }
+
+    fun generateCustom() {
+        ScriptEngineManager().getEngineByName("javascript")
+            .let {
+                it.eval(FileReader("conf/${choice_code_template}"))
+                val invokeFunction = (it as NashornScriptEngine).invokeFunction(
+                    "generateCustom",
+                    path,
+                    `package`,
+                    table,
+                    columns,
+                    tableName_UPPER_UNDERSCORE,
+                    tableName_UPPER_CAMEL,
+                    tableName_LOWER_CAMEL,
+                    pk_name_LOWER_CAMELE,
+                    pk_name_UPPER_CAMELE,
+                    pk_name_UPPER_UNDERSCORE,
+                    pk_javaType,
+                    pk_comment
+                )
+                invokeFunction as ScriptObjectMirror
+            }.run {
+                val fileName = this["fileName"].toString()
+                val content = this["content"].toString()
+                FileUtil.newFile(content, "temp", fileName)
             }
     }
 
