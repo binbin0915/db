@@ -4,6 +4,9 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.holland.db.DataSource.*
 import com.holland.db.service.*
+import com.holland.db.service.impl.mysql.MysqlCreateTableByViewImpl
+import com.holland.db.service.impl.oracle.OracleCreateTableByViewImpl
+import com.holland.db.service.impl.postgre.PostgreCreateTableByViewImpl
 import com.holland.util.FileUtil
 import com.holland.util.TimeUtil
 import java.io.File
@@ -205,15 +208,14 @@ class DBController(
         }
     }
 
-    fun generateCreateTableSql(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>) {
-        Class.forName("com.holland.db.service.impl.${dataSource.lowerCase}.${dataSource.upperCamelCase}CreateTableByViewImpl")
-            .getDeclaredConstructor()
-            .newInstance()
-            .let {
-                it as CreateTableByView
-                it.doIt(path, `package`, table, columns)
-            }
-    }
+    fun generateCreateTableSql_oracle(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>) =
+        OracleCreateTableByViewImpl().doIt(path, `package`, table, columns)
+
+    fun generateCreateTableSql_mysql(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>) =
+        MysqlCreateTableByViewImpl().doIt(path, `package`, table, columns)
+
+    fun generateCreateTableSql_postgre(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>) =
+        PostgreCreateTableByViewImpl().doIt(path, `package`, table, columns)
 
     fun generateCustom(path: String, `package`: String, table: TableTemplate, columns: List<ColumnTemplate>, choice_code_template: String) {
         GeneratorJS(path, `package`, table, columns, choice_code_template).generateCustom()

@@ -17,18 +17,19 @@
     </TableView>
        <Text layoutX="159.0" layoutY="43.0" strokeType="OUTSIDE" strokeWidth="0.0" text="代码模板" wrappingWidth="50.0" />
        <Text layoutX="159.0" layoutY="68.0" strokeType="OUTSIDE" strokeWidth="0.0" text="后端路径" />
-       <Text layoutX="487.0" layoutY="43.0" strokeType="OUTSIDE" strokeWidth="0.0" text="包前缀" />
-       <TextField id="text_be" layoutX="210.0" layoutY="52.0" prefHeight="23.0" prefWidth="448.0" promptText="指定到'main'模块就好了，默认生成到运行文件下的temp、sql文件夹" />
-       <TextField id="text_package" layoutX="525.0" layoutY="27.0" prefHeight="23.0" prefWidth="173.0" text="com.holland" />
+       <Text layoutX="440.0" layoutY="43.0" strokeType="OUTSIDE" strokeWidth="0.0" text="包前缀" />
+       <TextField id="text_be" layoutX="210.0" layoutY="52.0" prefHeight="23.0" prefWidth="448.0" promptText="指定到'main'模块就好了，默认生成到运行文件下的temp文件夹" />
+       <TextField id="text_package" layoutX="479.0" layoutY="27.0" prefHeight="23.0" prefWidth="219.0" text="com.holland" />
        <Button id="btn_be" layoutX="658.0" layoutY="52.0" mnemonicParsing="false" text="选择" />
        <Button id="btn_gr_pojo" layoutX="245.0" layoutY="428.0" mnemonicParsing="false" text="生成pojo" />
        <Button id="btn_gr_mapper" layoutX="312.0" layoutY="428.0" mnemonicParsing="false" text="生成mapper" />
        <Button id="btn_gr_service" layoutX="396.0" layoutY="428.0" mnemonicParsing="false" text="生成service" />
        <Button id="btn_gr_control" layoutX="476.0" layoutY="428.0" mnemonicParsing="false" text="生成control" />
        <Button id="btn_gr_be" layoutX="157.0" layoutY="428.0" mnemonicParsing="false" text="生成后端项目" />
-       <Button id="btn_gr_sql" layoutX="157.0" layoutY="405.0" mnemonicParsing="false" text="生成建表语句" />
+       <Button id="btn_gr_sql_oracle" layoutX="157.0" layoutY="405.0" mnemonicParsing="false" text="生成oracle建表语句" />
       <Button id="btn_show_params" layoutX="636.0" layoutY="428.0" mnemonicParsing="false" text="查看参数" />
-      <ChoiceBox id="choice_code_template" layoutX="210.0" layoutY="27.0" prefHeight="23.0" prefWidth="275.0" />
-      <Button id="btn_gr_custom" layoutX="245.0" layoutY="405.0" mnemonicParsing="false" text="生成自定义的文件" />
+      <ChoiceBox id="choice_code_template" layoutX="210.0" layoutY="27.0" prefHeight="23.0" prefWidth="226.0" />
+      <Button id="btn_gr_custom" layoutX="402.0" layoutY="405.0" mnemonicParsing="false" text="生成自定义的文件" />
+      <Button id="btn_gr_sql_mysql" layoutX="279.0" layoutY="405.0" mnemonicParsing="false" text="生成mysql建表语句" />
    </children>
 </AnchorPane>

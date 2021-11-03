@@ -67,7 +67,7 @@ object UiUtil {
                 },
                 "版本" to {
                     Alert(Alert.AlertType.INFORMATION).apply {
-                        contentText = "版本日期 2021年10月28日"
+                        contentText = "版本日期 2021年11月03日"
                         show()
                     }
                 }

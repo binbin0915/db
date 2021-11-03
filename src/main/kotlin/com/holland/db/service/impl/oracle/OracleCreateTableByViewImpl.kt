@@ -29,7 +29,7 @@ class OracleCreateTableByViewImpl : CreateTableByView {
             list1.add(
                 "\t" + it.columnName + " "
                         + when (it.dbDataType) {
-                    "DATE", "NUMBER", "TIMESTAMP(6)", "TIMESTAMP" -> it.dbDataType
+                    "DATE", "NUMBER","DOUBLE", "TIMESTAMP(6)", "TIMESTAMP","DATETIME" -> it.dbDataType
                     else -> it.dbDataType + "(" + it.charLength + ")"
                 }
                         + if (it.nullable) " " else " not null "
